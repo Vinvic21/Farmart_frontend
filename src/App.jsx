@@ -1,18 +1,12 @@
-import './App.css'
+import React from 'react';
+import './App.css';
+import Navbar from './components/ui/Navbar';
+import Footer from './components/ui/Footer';
 
 function App() {
   return (
     <div className="app">
-      <nav className="navbar">
-        <h2 className="logo">Farmart</h2>
-
-        <div className="nav-links">
-          <a href="/">Home</a>
-          <a href="#animals">Animals</a>
-          <a href="#about">About</a>
-          <button className="login-btn">Login</button>
-        </div>
-      </nav>
+      <Navbar />
 
       <main>
         <section className="hero">
@@ -61,8 +55,10 @@ function App() {
           </div>
         </section>
       </main>
+
+      <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
