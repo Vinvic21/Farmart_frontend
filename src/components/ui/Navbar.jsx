@@ -1,8 +1,7 @@
-import React from "react";
 
 const Navbar = ({ user }) => {
-  const isFarmer = user?.role === "farmer";
-  const isBuyer = user?.role === "buyer";
+  const isFarmer = user?.role === 'farmer';
+  const isBuyer = user?.role === 'buyer';
 
   return (
     <nav>

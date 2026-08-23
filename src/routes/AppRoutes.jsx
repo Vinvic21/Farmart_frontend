@@ -1,15 +1,15 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from 'react-router-dom';
 
-import LandingPage from "../pages/LandingPage";
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
+import LandingPage from '../pages/LandingPage';
+import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 
-import BrowsePage from "../pages/buyer/BrowsePage";
-import CartPage from "../pages/buyer/CartPage";
-import CheckoutPage from "../pages/buyer/CheckoutPage";
-import OrderHistoryPage from "../pages/buyer/OrderHistoryPage";
+import BrowsePage from '../pages/buyer/BrowsePage';
+import CartPage from '../pages/buyer/CartPage';
+import CheckoutPage from '../pages/buyer/CheckoutPage';
+import OrderHistoryPage from '../pages/buyer/OrderHistoryPage';
 
-import DashboardPage from "../pages/farmer/DashboardPage";
+import DashboardPage from '../pages/farmer/DashboardPage';
 
 function AnimalDetailPage() {
   return (

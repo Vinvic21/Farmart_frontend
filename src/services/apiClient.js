@@ -1,15 +1,15 @@
-import axios from "axios";
+import axios from 'axios';
 
 const APIClient = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
 APIClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -29,24 +29,24 @@ APIClient.interceptors.response.use(
       const { status } = error.response;
 
       if (status === 401) {
-        localStorage.removeItem("token");
+        localStorage.removeItem('token');
       }
 
       if (status === 403) {
-        console.error("Access denied.");
+        console.error('Access denied.');
       }
 
       if (status === 404) {
-        console.error("Resource not found.");
+        console.error('Resource not found.');
       }
 
       if (status >= 500) {
-        console.error("Server error. Please try again later.");
+        console.error('Server error. Please try again later.');
       }
     } else if (error.request) {
-      console.error("No response received from the server.");
+      console.error('No response received from the server.');
     } else {
-      console.error("Request error:", error.message);
+      console.error('Request error:', error.message);
     }
 
     return Promise.reject(error);

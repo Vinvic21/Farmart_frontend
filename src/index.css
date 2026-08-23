@@ -114,12 +114,11 @@ code {
   background: var(--code-bg);
 } */
 
-
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --color-primary: #3F6B47;
-  --color-secondary: #E4B94E;
-  --color-danger: #B23A2E;
-  --color-surface: #EDE9DD;
+  --color-primary: #3f6b47;
+  --color-secondary: #e4b94e;
+  --color-danger: #b23a2e;
+  --color-surface: #ede9dd;
 }
