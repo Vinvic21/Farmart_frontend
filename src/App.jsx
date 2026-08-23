@@ -1,7 +1,7 @@
-import './App.css'
-import Navbar from './components/ui/Navbar'
-import Footer from './components/ui/Footer'
-import AppRoutes from './routes/AppRoutes'
+import './App.css';
+import Navbar from './components/ui/Navbar';
+import Footer from './components/ui/Footer';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
 
       <Footer />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
