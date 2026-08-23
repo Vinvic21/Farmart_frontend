@@ -1,3 +1,7 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -108,4 +112,14 @@ code {
   line-height: 135%;
   padding: 4px 8px;
   background: var(--code-bg);
+} */
+
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3F6B47;
+  --color-secondary: #E4B94E;
+  --color-danger: #B23A2E;
+  --color-surface: #EDE9DD;
 }
