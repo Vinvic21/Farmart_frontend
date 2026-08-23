@@ -12,8 +12,12 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@reduxjs/toolkit": "^2.12.0",
+    "axios": "^1.19.0",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "react-redux": "^9.3.0",
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
