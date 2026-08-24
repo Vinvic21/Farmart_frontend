@@ -24,30 +24,29 @@ function App() {
             </Link>
             
             <div className="flex gap-6 items-center">
-              <Link to="/browse" className="text-gray-700 hover:text-green-600">Browse</Link>
-              <Link to="/animals" className="text-gray-700 hover:text-green-600">Animals</Link>
-              <Link to="/cart" className="text-gray-700 hover:text-green-600">Cart</Link>
+              <Link to="/browse" className="text-gray-700 hover:text-green-600 font-medium">Browse</Link>
+              <Link to="/cart" className="text-gray-700 hover:text-green-600 font-medium">Cart</Link>
               
               {isAuthenticated ? (
                 <>
                   {user?.role === 'buyer' && (
-                    <Link to="/buyer/dashboard" className="text-gray-700 hover:text-green-600">Dashboard</Link>
+                    <Link to="/orders" className="text-gray-700 hover:text-green-600 font-medium">My Orders</Link>
                   )}
                   {user?.role === 'farmer' && (
-                    <Link to="/farmer/dashboard" className="text-gray-700 hover:text-green-600">Dashboard</Link>
+                    <Link to="/farmer/dashboard" className="text-gray-700 hover:text-green-600 font-medium">Dashboard</Link>
                   )}
                   <span className="text-gray-600">Hi, {user?.name}</span>
                   <button 
                     onClick={handleLogout}
-                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 font-medium"
                   >
                     Logout
                   </button>
                 </>
               ) : (
                 <>
-                  <Link to="/login" className="text-gray-700 hover:text-green-600">Login</Link>
-                  <Link to="/register" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Register</Link>
+                  <Link to="/login" className="text-gray-700 hover:text-green-600 font-medium">Login</Link>
+                  <Link to="/register" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium">Register</Link>
                 </>
               )}
             </div>
@@ -56,7 +55,14 @@ function App() {
       </nav>
 
       {/* ROUTES */}
-      <AppRoutes />
+      <main>
+        <AppRoutes />
+      </main>
+
+      {/* FOOTER */}
+      <footer className="bg-white border-t mt-10 py-6 text-center text-gray-500">
+        <p>© 2026 Farmart. Livestock Marketplace KE</p>
+      </footer>
     </div>
   );
 }
