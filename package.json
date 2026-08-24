@@ -28,7 +28,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
-    "autoprefixer": "^10.5.4",
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -37,9 +36,7 @@
     "init": "^0.1.2",
     "jsdom": "^29.1.1",
     "npx": "^10.2.2",
-    "postcss": "^8.5.26",
     "prettier": "^3.9.6",
-    "tailwindcss": "^4.3.3",
     "vite": "^8.2.0",
     "vitest": "^4.1.11"
   }
