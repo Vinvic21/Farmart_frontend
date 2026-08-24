@@ -8,6 +8,7 @@ import BrowsePage from '../pages/buyer/BrowsePage';
 import CartPage from '../pages/buyer/CartPage';
 import CheckoutPage from '../pages/buyer/CheckoutPage';
 import OrderHistoryPage from '../pages/buyer/OrderHistoryPage';
+import OrderConfirmationPage from '../pages/buyer/OrderConfirmationPage';
 
 import DashboardPage from '../pages/farmer/DashboardPage';
 
@@ -32,6 +33,7 @@ function AppRoutes() {
       <Route path="/animals/:id" element={<AnimalDetailPage />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/checkout" element={<CheckoutPage />} />
+      <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
 
       <Route path="/farmer/dashboard" element={<DashboardPage />} />
       <Route path="/orders" element={<OrderHistoryPage />} />
