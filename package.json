@@ -14,12 +14,19 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
+<<<<<<< HEAD
     "@tailwindcss/vite": "^4.3.3",
     "axios": "^1.19.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2"
+=======
+    "axios": "^1.19.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-redux": "^9.3.0"
+>>>>>>> 1aea83b (authSlice (Redux)-login/register/logout +token persistence)
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
