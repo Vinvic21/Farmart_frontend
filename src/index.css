@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+@theme {
+  --color-farmart-green: #16a34a;
+}

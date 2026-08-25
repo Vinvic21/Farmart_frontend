@@ -3,13 +3,12 @@ import { Link } from "react-router-dom";
 import farmHeroImage from "../../assets/farm-hero.png";
 
 export default function LoginPage() {
-  // Two simple pieces of state: the form values, and any error messages
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
 
   function handleSubmit(e) {
-    e.preventDefault(); // stop the page from reloading
+    e.preventDefault();
 
     const newErrors = {};
 
