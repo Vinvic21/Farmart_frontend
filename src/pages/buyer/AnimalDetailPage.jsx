@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
-import { addToCart } from '../../features/cartSlice'
+import { addToCart } from '../../features/cart/cartSlice'
 
 // Same dummy data as Browse
 const allAnimals = [
