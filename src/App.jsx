@@ -2,6 +2,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
+import CheckoutPage from "./pages/buyer/CheckoutPage";
+import OrderConfirmationPage from "./pages/buyer/OrderConfirmationPage";
 
 function App() {
   const dispatch = useDispatch();
