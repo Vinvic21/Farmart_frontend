@@ -1,65 +1,109 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import APIClient from '../../services/apiClient';
 
-const API_URL = 'http://localhost:5000/api'
+// Fetch animal list — sends BOTH naming conventions as query params so it
+// works whichever the backend actually expects. Unrecognized params are
+// typically just ignored by the backend, so this is safe either way.
+// once confirmed with backend, trim this down to only the real param names.
+export const fetchAnimals = createAsyncThunk(
+  'animals/fetchAnimals',
+  async (filters = {}, { rejectWithValue }) => {
+    try {
+      const { page = 1, limit = 12, type = '', species = '', breed = '', ageMin = '', ageMax = '', search = '', q = '' } = filters;
 
-// Thunk with query params for pagination, search, filter
-export const fetchAnimals = createAsyncThunk('animals/fetchAll', async (params = {}, { rejectWithValue }) => {
-  try {
-    const { page = 1, limit = 12, search = '', breed = '', ageMin = '', ageMax = '', species = '' } = params
-    
-    const query = new URLSearchParams()
-    query.append('page', page)
-    query.append('limit', limit)
-    if(search) query.append('search', search)
-    if(breed) query.append('breed', breed)
-    if(ageMin) query.append('ageMin', ageMin)
-    if(ageMax) query.append('ageMax', ageMax)
-    if(species) query.append('species', species)
+      const params = {};
+      if (page) params.page = page;
+      if (limit) params.limit = limit;
+      if (type) { params.type = type; params.species = type; }
+      if (species) { params.species = species; params.type = species; }
+      if (breed) params.breed = breed;
+      if (ageMin) { params.age_min = ageMin; params.ageMin = ageMin; }
+      if (ageMax) { params.age_max = ageMax; params.ageMax = ageMax; }
+      if (search) { params.q = search; params.search = search; }
+      if (q) { params.q = q; params.search = q; }
 
-    const res = await axios.get(`${API_URL}/animals?${query.toString()}`)
-    return res.data // backend should return { animals: [], totalPages: 5, currentPage: 1 }
-  } catch (err) {
-    return rejectWithValue(err.response.data)
+      const response = await APIClient.get('/animals', { params });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to load animals');
+    }
   }
-})
+);
+
+export const fetchAnimalById = createAsyncThunk(
+  'animals/fetchAnimalById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await APIClient.get(`/animals/${id}`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to load animal');
+    }
+  }
+);
 
 const animalsSlice = createSlice({
   name: 'animals',
   initialState: {
-    items: [],
-    loading: false,
-    error: null,
+    list: [],
+    listStatus: 'idle', // idle | loading | succeeded | failed
+    listError: null,
     currentPage: 1,
     totalPages: 1,
-    filters: { search: '', breed: '', ageMin: '', ageMax: '', species: '' }
+
+    current: null,
+    detailStatus: 'idle',
+    detailError: null,
+
+    filters: { type: '', breed: '', ageMin: '', ageMax: '', search: '' },
   },
   reducers: {
-    setFilters: (state, action) => {
-      state.filters = { ...state.filters, ...action.payload }
+    setFilters(state, action) {
+      state.filters = { ...state.filters, ...action.payload };
     },
-    clearFilters: (state) => {
-      state.filters = { search: '', breed: '', ageMin: '', ageMax: '', species: '' }
-    }
+    clearFilters(state) {
+      state.filters = { type: '', breed: '', ageMin: '', ageMax: '', search: '' };
+    },
+    clearCurrentAnimal(state) {
+      state.current = null;
+      state.detailStatus = 'idle';
+      state.detailError = null;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAnimals.pending, (state) => { 
-        state.loading = true 
-        state.error = null
+      // fetch list — handles both a plain array response and a paginated
+      // { animals, totalPages, currentPage } response
+      .addCase(fetchAnimals.pending, (state) => {
+        state.listStatus = 'loading';
+        state.listError = null;
       })
       .addCase(fetchAnimals.fulfilled, (state, action) => {
-        state.loading = false
-        state.items = action.payload.animals || action.payload // support both formats
-        state.currentPage = action.payload.currentPage || 1
-        state.totalPages = action.payload.totalPages || 1
+        state.listStatus = 'succeeded';
+        state.list = action.payload.animals || action.payload;
+        state.currentPage = action.payload.currentPage || 1;
+        state.totalPages = action.payload.totalPages || 1;
       })
       .addCase(fetchAnimals.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload?.message || 'Failed to fetch animals'
+        state.listStatus = 'failed';
+        state.listError = action.payload;
       })
-  }
-})
 
-export const { setFilters, clearFilters } = animalsSlice.actions
-export default animalsSlice.reducer
+      // fetch detail
+      .addCase(fetchAnimalById.pending, (state) => {
+        state.detailStatus = 'loading';
+        state.detailError = null;
+      })
+      .addCase(fetchAnimalById.fulfilled, (state, action) => {
+        state.detailStatus = 'succeeded';
+        state.current = action.payload;
+      })
+      .addCase(fetchAnimalById.rejected, (state, action) => {
+        state.detailStatus = 'failed';
+        state.detailError = action.payload;
+      });
+  },
+});
+
+export const { setFilters, clearFilters, clearCurrentAnimal } = animalsSlice.actions;
+export default animalsSlice.reducer;
