@@ -12,14 +12,7 @@ import OrderConfirmationPage from '../pages/buyer/OrderConfirmationPage';
 
 import DashboardPage from '../pages/farmer/DashboardPage';
 
-function AnimalDetailPage() {
-  return (
-    <div>
-      <h1>Animal Details</h1>
-      <p>Animal details will be displayed here.</p>
-    </div>
-  );
-}
+import AnimalDetailPage from '../pages/buyer/AnimalDetailPage';
 
 function AppRoutes() {
   return (
