@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAnimalById, clearCurrentAnimal } from '../../features/animals/animalsSlice';
+import { addToCart } from '../../features/cart/cartSlice';
 
 function AnimalDetailPage() {
   const { id } = useParams();
@@ -15,11 +16,9 @@ function AnimalDetailPage() {
     };
   }, [id, dispatch]);
 
-  // cartSlice.js is still empty. Once it has a real addToCart
-  // action, replace this with:
-  //   dispatch(addToCart({ animalId: animal.id, quantity: 1 }))
   const handleAddToCart = () => {
-    alert(`${animal.breed} ${animal.type} added to cart (placeholder — cart not wired up yet)`);
+    dispatch(addToCart(animal));
+    alert(`${animal.breed} ${animal.type} added to cart!`);
   };
 
   if (detailStatus === 'loading') {

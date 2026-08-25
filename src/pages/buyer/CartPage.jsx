@@ -23,7 +23,7 @@ export default function CartPage() {
         <div key={item.id} className="flex items-center justify-between border-b py-4">
           <div>
             <h3 className="font-bold">{item.name}</h3>
-            <p>Ksh {item.price}</p>
+            <p>Ksh {item.price.toLocaleString()}</p>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => dispatch(updateQuantity({id: item.id, quantity: Math.max(1, item.quantity - 1)}))} className="border px-3 py-1">-</button>
@@ -34,8 +34,11 @@ export default function CartPage() {
         </div>
       ))}
       <div className="mt-6 text-right">
-        <h3 className="text-xl font-bold">Total: Ksh {total}</h3>
-        <button className="bg-green-600 text-white px-6 py-3 rounded mt-2 font-bold">Checkout</button>
+        <h3 className="text-xl font-bold">Total: Ksh {total.toLocaleString()}</h3>
+        {/* CHANGED THIS LINE */}
+        <Link to="/checkout" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded mt-2 font-bold inline-block">
+          Proceed to Checkout
+        </Link>
       </div>
     </div>
   )
