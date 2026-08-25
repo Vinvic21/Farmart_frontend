@@ -11,6 +11,7 @@ import CheckoutPage from "../pages/buyer/CheckoutPage";
 import OrderConfirmationPage from "../pages/buyer/OrderConfirmationPage";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 import AnimalFormPage from "../pages/farmer/AnimalFormPage"; 
+import FarmerOrdersPage from "../pages/farmer/FarmerOrdersPage";
 
 export default function AppRoutes() {
   return (
@@ -33,9 +34,11 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute roles={['farmer']} />}>
         <Route path="/farmer/dashboard" element={<FarmerDashboard />} /> {/* FIXED: nikaweka / */}
         <Route path="/farmer/orders" element={<OrderHistoryPage />} />
-        <Route path="/farmer/add-animal" element={<AnimalFormPage />} /> {/* ADD HII */}
-        <Route path="/farmer/edit-animal/:id" element={<AnimalFormPage />} /> {/* ADD HII */}
+        <Route path="/farmer/add-animal" element={<AnimalFormPage />} /> {/* */}
+        <Route path="/farmer/edit-animal/:id" element={<AnimalFormPage />} /> {/* */}
+        <Route path="/farmer/orders" element={<FarmerOrdersPage />} /> {/* */}
       </Route>
     </Routes>
   );
-}
+} 
+    
