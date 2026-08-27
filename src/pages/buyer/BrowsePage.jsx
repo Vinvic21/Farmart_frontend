@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { Link } from 'react-router-dom' // <- added this for details page
 import { addToCart } from '../../features/cart/cartSlice'
+import toast from 'react-hot-toast'
 
 const allAnimals = [ // pretend this is from API
   { id: 1, name: "Goat", price: 15000, img: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400", category: "Goat" },
@@ -29,7 +30,7 @@ export default function Browse() {
 
   const handleAddToCart = (animal) => {
     dispatch(addToCart(animal))
-    alert(`${animal.name} added to cart!`)
+    toast.success(`${animal.name} added to cart!`)
   }
 
   return (

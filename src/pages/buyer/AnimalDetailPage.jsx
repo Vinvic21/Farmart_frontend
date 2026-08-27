@@ -1,8 +1,10 @@
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAnimalById, clearCurrentAnimal } from '../../features/animals/animalsSlice';
 import { addToCart } from '../../features/cart/cartSlice';
+import toast from 'react-hot-toast';
 
 function AnimalDetailPage() {
   const { id } = useParams();
@@ -18,15 +20,11 @@ function AnimalDetailPage() {
 
   const handleAddToCart = () => {
     dispatch(addToCart(animal));
-    alert(`${animal.breed} ${animal.type} added to cart!`);
-  };
+    toast.success(`${animal.breed} ${animal.type} added to cart!`);
+  }; 
 
   if (detailStatus === 'loading') {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center text-gray-500">
-        Loading animal details...
-      </div>
-    );
+    return <LoadingSpinner label="Loading animal details..." />;
   }
 
   if (detailStatus === 'failed') {
@@ -34,7 +32,7 @@ function AnimalDetailPage() {
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <p className="text-danger font-semibold mb-2">Couldn't load this animal.</p>
         <p className="text-gray-500 text-sm mb-6">{detailError}</p>
-        <Link to="/browse" className="text-primary font-medium">
+        <Link to="/browse" className="text-farmart-green font-medium">
           ← Back to browse
         </Link>
       </div>
@@ -45,7 +43,7 @@ function AnimalDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-10 sm:py-16">
-      <Link to="/browse" className="text-sm text-gray-500 hover:text-primary mb-6 inline-block">
+      <Link to="/browse" className="text-sm text-gray-500 hover:text-farmart-green mb-6 inline-block">
         ← Back to browse
       </Link>
 
@@ -63,13 +61,13 @@ function AnimalDetailPage() {
         </div>
 
         <div className="p-6 sm:p-8 sm:w-1/2">
-          <span className="inline-block bg-primary/10 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-3">
+          <span className="inline-block bg-farmart-green/10 text-farmart-green text-xs font-semibold px-3 py-1 rounded-full mb-3">
             {animal.type}
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold mb-1">{animal.breed}</h1>
           <p className="text-gray-500 text-sm mb-4">from {animal.farmer_name}</p>
 
-          <p className="text-3xl font-bold text-primary mb-6">
+          <p className="text-3xl font-bold text-farmart-green mb-6">
             ${animal.price?.toLocaleString()}
           </p>
 
@@ -91,7 +89,7 @@ function AnimalDetailPage() {
           <button
             onClick={handleAddToCart}
             disabled={animal.status === 'sold_out'}
-            className="w-full bg-primary text-white rounded-lg py-3 font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-farmart-green text-white rounded-lg py-3 font-semibold hover:bg-farmart-green/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {animal.status === 'sold_out' ? 'Sold Out' : 'Add to Cart'}
           </button>
