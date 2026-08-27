@@ -1,34 +1,16 @@
-// import { Link } from 'react-router-dom'
+import { Link, useLocation, Navigate } from 'react-router-dom';
 
-// export default function OrderConfirmationPage() {
-//   return (
-//     <div className="text-center p-12">
-//       <div className="text-6xl mb-4">🎉</div>
-//       <h2 className="text-4xl font-bold text-green-600 mb-4">Order Placed!</h2>
-//       <p className="text-gray-600 mb-6">Thank you for shopping with Farmart</p>
-//       <Link to="/browse" className="bg-blue-600 text-white px-6 py-3 rounded-lg">
-//         Continue Shopping
-//       </Link>
-//     </div>
-//   )
-// }
-
-
-import { Link, useLocation } from 'react-router-dom';
+const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔' };
 
 function OrderConfirmationPage() {
   const location = useLocation();
+  const order = location.state?.order;
 
-  // Falls back to placeholder data if visited directly without real order state
-  const order = location.state?.order || {
-    id: 'FM-8829',
-    items: [
-      { name: 'Angus Heifer - 12 Months', quantity: 2, price: 1200 },
-      { name: 'Premium Organic Feed (50lb)', quantity: 5, price: 35 },
-    ],
-  };
-
-  const total = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // No order in state means the page was visited directly, not after a
+  // real checkout 
+  if (!order) {
+    return <Navigate to="/orders" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10 sm:py-16 flex justify-center">
@@ -45,27 +27,29 @@ function OrderConfirmationPage() {
           Order Placed Successfully!
         </h1>
         <p className="text-gray-500 text-center text-sm sm:text-base mb-8">
-          Thank you for your purchase. We've received your order.
+          Thank you for your purchase. The farmer(s) will confirm your order shortly.
         </p>
 
         <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
           <div className="flex justify-between items-center px-4 sm:px-6 py-4 bg-gray-50 border-b border-gray-200">
             <span className="text-sm font-medium text-gray-600">Order Number</span>
-            <span className="font-bold text-farmart-green">#{order.id}</span>
+            <span className="font-bold text-farmart-green">#{order.order_number || order.id}</span>
           </div>
 
           <div className="px-4 sm:px-6 divide-y divide-gray-100">
-            {order.items.map((item, i) => (
-              <div key={i} className="flex items-center gap-4 py-5">
+            {(order.items || []).map((item) => (
+              <div key={item.id} className="flex items-center gap-4 py-5">
                 <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-100 flex items-center justify-center text-2xl sm:text-3xl flex-shrink-0">
-                  🐾
+                  {TYPE_EMOJI[(item.animal?.type || '').toLowerCase()] || '🐾'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm sm:text-base">{item.name}</p>
+                  <p className="font-semibold text-sm sm:text-base capitalize">
+                    {item.animal?.breed} {item.animal?.type}
+                  </p>
                   <p className="text-xs sm:text-sm text-gray-500">Qty: {item.quantity}</p>
                 </div>
                 <span className="font-bold text-sm sm:text-base whitespace-nowrap">
-                  ${(item.price * item.quantity).toLocaleString()}
+                  Ksh {(item.price_at_purchase * item.quantity).toLocaleString()}
                 </span>
               </div>
             ))}
@@ -73,7 +57,7 @@ function OrderConfirmationPage() {
 
           <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
             <span className="font-semibold">Total</span>
-            <span className="font-bold text-lg text-farmart-green">${total.toLocaleString()}</span>
+            <span className="font-bold text-lg text-farmart-green">Ksh {order.total_amount?.toLocaleString()}</span>
           </div>
         </div>
 

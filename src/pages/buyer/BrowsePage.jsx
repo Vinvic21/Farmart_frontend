@@ -1,99 +1,177 @@
-import { useState } from 'react'
-import { useDispatch } from 'react-redux'
-import { Link } from 'react-router-dom' // <- added this for details page
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { fetchAnimals } from '../../features/animals/animalsSlice'
 import { addToCart } from '../../features/cart/cartSlice'
 import toast from 'react-hot-toast'
+import AnimalCard from '../../components/ui/AnimalCard'
 
-const allAnimals = [ // pretend this is from API
-  { id: 1, name: "Goat", price: 15000, img: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400", category: "Goat" },
-  { id: 2, name: "Cow", price: 80000, img: "https://images.unsplash.com/photo-1527153857098-ia0a6f81a3f4?w=400", category: "Cow" },
-  { id: 3, name: "Chicken", price: 1200, img: "https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=400", category: "Chicken" },
-  { id: 4, name: "Sheep", price: 20000, img: "https://images.unsplash.com/photo-1559561853-08451507cbe7?w=400", category: "Sheep" },
-  { id: 5, name: "Goat 2", price: 18000, img: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=400", category: "Goat" },
-  { id: 6, name: "Cow 2", price: 90000, img: "https://images.unsplash.com/photo-1527153857098-ia0a6f81a3f4?w=400", category: "Cow" },
+const TYPE_FILTERS = [
+  { label: 'All', value: '' },
+  { label: 'Cattle', value: 'cow' },
+  { label: 'Goats', value: 'goat' },
+  { label: 'Sheep', value: 'sheep' },
+  { label: 'Poultry', value: 'chicken' },
 ]
 
-export default function Browse() {
+const SORT_OPTIONS = [
+  { label: 'Relevance', value: 'relevance' },
+  { label: 'Price: Low to High', value: 'price_asc' },
+  { label: 'Price: High to Low', value: 'price_desc' },
+]
+
+export default function BrowsePage() {
   const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { list: animals, listStatus, listError, currentPage, totalPages, total } = useSelector((state) => state.animals)
+  const { isAuthenticated } = useSelector((state) => state.auth)
+
   const [search, setSearch] = useState('')
-  const [filter, setFilter] = useState('All')
+  const [type, setType] = useState(searchParams.get('type') || '')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [sortBy, setSortBy] = useState('relevance')
   const [page, setPage] = useState(1)
-  const perPage = 4
 
-  const filtered = allAnimals.filter(a => 
-    a.name.toLowerCase().includes(search.toLowerCase()) && 
-    (filter === 'All' || a.category === filter)
-  )
+  useEffect(() => {
+    dispatch(fetchAnimals({ page, search, type, minPrice, maxPrice }))
+  }, [dispatch, page, search, type, minPrice, maxPrice])
+
   
-  const paginated = filtered.slice((page-1)*perPage, page*perPage)
-  const totalPages = Math.ceil(filtered.length / perPage)
+  const sortedAnimals = useMemo(() => {
+    if (sortBy === 'price_asc') return [...animals].sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+    if (sortBy === 'price_desc') return [...animals].sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
+    return animals
+  }, [animals, sortBy])
 
-  const handleAddToCart = (animal) => {
+  const handleAddToCart = async (animal) => {
+    if (!isAuthenticated) {
+      navigate('/login')
+      return
+    }
     dispatch(addToCart(animal))
-    toast.success(`${animal.name} added to cart!`)
+    toast.success(`${animal.name} added to cart!`) 
   }
 
+  const activeFilters = [
+    search && { key: 'search', label: `"${search}"`, clear: () => setSearch('') },
+    type && { key: 'type', label: TYPE_FILTERS.find((t) => t.value === type)?.label, clear: () => setType('') },
+    minPrice && { key: 'min', label: `Min Ksh ${minPrice}`, clear: () => setMinPrice('') },
+    maxPrice && { key: 'max', label: `Max Ksh ${maxPrice}`, clear: () => setMaxPrice('') },
+  ].filter(Boolean)
+
   return (
-    <div className="p-8 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-bold mb-6 text-gray-800">Animals for Sale</h2>
-      
-      {/* SEARCH + FILTER */}
-      <div className="flex gap-4 mb-6">
-        <input 
-          type="text" 
-          placeholder="Search animals..."
-          className="border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
-        <select 
-          className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={filter}
-          onChange={e => {setFilter(e.target.value); setPage(1)}}
-        >
-          <option>All</option>
-          <option>Goat</option>
-          <option>Cow</option>
-          <option>Chicken</option>
-          <option>Sheep</option>
-        </select>
-      </div>
+    <div className="bg-farmart-cream min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Search */}
+        <div className="relative mb-5">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+          <input
+            type="text"
+            placeholder="Search by breed... (e.g. Angus, Boer)"
+            className="w-full border border-gray-200 bg-white rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-farmart-green"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
+          />
+        </div>
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {paginated.length > 0 ? paginated.map(animal => (
-          <div key={animal.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition flex flex-col">
-            <Link to={`/animal/${animal.id}`}>
-              <img src={animal.img} className="w-full h-48 object-cover rounded" alt={animal.name} />
-              <h3 className="font-bold text-xl mt-3 hover:text-green-600">{animal.name}</h3>
-            </Link>
-            <p className="text-gray-600 mb-3">Ksh {animal.price.toLocaleString()}</p>
-            <button 
-              onClick={() => handleAddToCart(animal)}
-              className="bg-green-600 hover:bg-green-700 text-white w-full py-2 rounded font-medium transition mt-auto"
+        {/* Type chips + price + sort */}
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          {TYPE_FILTERS.map((f) => (
+            <button
+              key={f.value || 'all'}
+              onClick={() => { setType(f.value); setPage(1) }}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition ${
+                type === f.value
+                  ? 'bg-farmart-green text-white border-farmart-green'
+                  : 'bg-white text-gray-600 border-gray-200 hover:border-farmart-green'
+              }`}
             >
-              Add to Cart
-            </button>
-          </div>
-        )) : (
-          <p className="col-span-4 text-center text-gray-500">No animals found</p>
-        )}
-      </div>
-
-      {/* PAGINATION */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({length: totalPages}).map((_, i) => (
-            <button 
-              key={i}
-              onClick={() => setPage(i+1)}
-              className={`px-4 py-2 rounded font-medium transition ${page === i+1 ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-gray-300'}`}
-            >
-              {i+1}
+              {f.label}
             </button>
           ))}
+
+          <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+            <input
+              type="number"
+              min="0"
+              placeholder="Min Ksh"
+              className="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-farmart-green"
+              value={minPrice}
+              onChange={(e) => { setMinPrice(e.target.value); setPage(1) }}
+            />
+            <span className="text-gray-400">–</span>
+            <input
+              type="number"
+              min="0"
+              placeholder="Max Ksh"
+              className="w-24 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-farmart-green"
+              value={maxPrice}
+              onChange={(e) => { setMaxPrice(e.target.value); setPage(1) }}
+            />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-farmart-green"
+            >
+              {SORT_OPTIONS.map((s) => (
+                <option key={s.value} value={s.value}>Sort: {s.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
-      )}
+
+        {/* Active filter pills */}
+        {activeFilters.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            {activeFilters.map((f) => (
+              <button
+                key={f.key}
+                onClick={f.clear}
+                className="flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full hover:border-red-300 hover:text-red-500 transition"
+              >
+                {f.label} <span className="text-gray-400">×</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Results heading */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display text-xl font-bold text-gray-800">
+            {listStatus === 'succeeded' ? `${total} result${total === 1 ? '' : 's'}` : 'Animals for Sale'}
+            {search && <span className="text-gray-500 font-normal"> for &ldquo;{search}&rdquo;</span>}
+          </h2>
+        </div>
+
+        {listStatus === 'loading' && <p className="text-center text-gray-500 py-16">Loading animals...</p>}
+        {listStatus === 'failed' && <p className="text-center text-red-500 py-16">{listError}</p>}
+
+        {listStatus === 'succeeded' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {sortedAnimals.length > 0 ? sortedAnimals.map((animal) => (
+              <AnimalCard key={animal.id} animal={animal} onAddToCart={handleAddToCart} />
+            )) : (
+              <p className="col-span-full text-center text-gray-500 py-16">No animals found</p>
+            )}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-10">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`w-9 h-9 rounded-lg font-medium transition ${currentPage === i + 1 ? 'bg-farmart-green text-white' : 'bg-white text-gray-600 border border-gray-200 hover:border-farmart-green'}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
