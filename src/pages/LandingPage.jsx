@@ -1,5 +1,19 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import heroImage from "../assets/farmart.jpg";
+import heroImage1 from "../assets/farmart1.png";
+import heroImage2 from "../assets/farmart2.png";
+
+const HERO_SLIDES = [
+  // objectPosition is tuned per-photo so the animals stay in frame on a
+  // wide/short banner (default center-crop clips subjects in tall source
+  // photos). Adjust the % if a photo gets swapped out.
+  { src: heroImage, alt: "Cattle grazing on a Kenyan farm at sunset", objectPosition: "50% 80%" },
+  { src: heroImage1, alt: "Livestock on a Farmart-listed farm", objectPosition: "50% 50%" },
+  { src: heroImage2, alt: "Livestock on a Farmart-listed farm", objectPosition: "50% 50%" },
+];
+
+const HERO_SLIDE_INTERVAL_MS = 5000;
 
 const CATEGORIES = [
   { label: "Cattle", type: "cow", emoji: "🐄" },
@@ -42,16 +56,31 @@ const STEPS = [
 ];
 
 function LandingPage() {
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, HERO_SLIDE_INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className="bg-farmart-cream">
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Cattle grazing on a Kenyan farm at sunset"
-            className="h-full w-full object-cover"
-          />
+          {HERO_SLIDES.map((slide, index) => (
+            <img
+              key={slide.src}
+              src={slide.src}
+              alt={slide.alt}
+              style={{ objectPosition: slide.objectPosition }}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-in-out ${
+                index === activeSlide ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
           <div className="absolute inset-0 bg-gradient-to-r from-farmart-green-deep/90 via-farmart-green-deep/70 to-farmart-green-deep/30" />
         </div>
 
@@ -83,6 +112,20 @@ function LandingPage() {
               </Link>
             </div>
           </div>
+        </div>
+
+        <div className="relative flex justify-center gap-2 pb-6">
+          {HERO_SLIDES.map((slide, index) => (
+            <button
+              key={slide.src}
+              type="button"
+              aria-label={`Show slide ${index + 1}`}
+              onClick={() => setActiveSlide(index)}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                index === activeSlide ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/60"
+              }`}
+            />
+          ))}
         </div>
       </section>
 

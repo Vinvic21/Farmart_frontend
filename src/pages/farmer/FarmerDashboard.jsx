@@ -99,7 +99,7 @@ const FarmerDashboard = () => {
         <aside className="md:w-56 flex-shrink-0">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 md:sticky md:top-24">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-farmart-green text-xl">🌱</span>
+              <span className="text-farmart-green text-xl"></span>
               <h2 className="font-display font-bold text-gray-800">Farmer Portal</h2>
             </div>
             <p className="text-xs text-gray-500 mb-5">Manage your livestock</p>
@@ -113,16 +113,16 @@ const FarmerDashboard = () => {
 
             <nav className="space-y-1 text-sm font-medium">
               <span className="flex items-center gap-2 px-3 py-2 rounded-lg bg-farmart-green/10 text-farmart-green-deep">
-                📊 Dashboard
+                 Dashboard
               </span>
               <a href="#my-animals" className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
-                🐾 My Animals
+                 My Animals
               </a>
               <Link to="/farmer/orders" className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-600 hover:bg-gray-50">
-                📦 Orders
+                 Orders
               </Link>
               <span className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-400 cursor-not-allowed">
-                ⚙️ Settings
+                 Settings
               </span>
             </nav>
           </div>
@@ -140,14 +140,14 @@ const FarmerDashboard = () => {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">Total Animals Listed</p>
-                <span className="text-farmart-green">🐾</span>
+                <span className="text-farmart-green"></span>
               </div>
               <p className="font-display text-3xl font-bold text-gray-800 mt-2">{stats.totalAnimals}</p>
             </div>
             <div className="bg-white rounded-xl border border-amber-200 shadow-sm p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">Pending Orders</p>
-                <span className="text-amber-500">📦</span>
+                <span className="text-amber-500"></span>
               </div>
               <p className="font-display text-3xl font-bold text-gray-800 mt-2">{stats.pendingOrders}</p>
               {stats.pendingOrders > 0 && (
@@ -157,7 +157,7 @@ const FarmerDashboard = () => {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">Total Revenue</p>
-                <span className="text-farmart-green">💰</span>
+                <span className="text-farmart-green"></span>
               </div>
               <p className="font-display text-3xl font-bold text-gray-800 mt-2">
                 Ksh {stats.totalRevenue.toLocaleString()}
@@ -192,7 +192,7 @@ const FarmerDashboard = () => {
                       <tr key={item.id} className="border-b border-gray-50 last:border-0">
                         <td className="px-5 py-3">
                           <span className="flex items-center gap-2">
-                            <span className="text-xl">{TYPE_EMOJI[(item.animal?.type || '').toLowerCase()] || '🐾'}</span>
+                            <span className="text-xl">{TYPE_EMOJI[(item.animal?.type || '').toLowerCase()] || ''}</span>
                             <span className="capitalize">{item.animal?.breed} {item.animal?.type}</span>
                           </span>
                         </td>
@@ -241,7 +241,7 @@ const FarmerDashboard = () => {
                         />
                       ) : null}
                       <span style={animal.image_url ? { display: 'none' } : undefined}>
-                        {TYPE_EMOJI[(animal.type || '').toLowerCase()] || '🐾'}
+                        {TYPE_EMOJI[(animal.type || '').toLowerCase()] || ''}
                       </span>
                     </div>
                     <div className="p-4">
