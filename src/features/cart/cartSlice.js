@@ -50,54 +50,69 @@ export const removeCartItem = createAsyncThunk(
   }
 )
 
-const initialState = {
-  id: null,
-  items: [], // [{ id, animal_id, quantity, subtotal, animal }]
-  totalItems: 0,
-  totalAmount: 0,
-  status: 'idle', // idle | loading | succeeded | failed
-  error: null,
+const loadCartFromStorage = () => {
+  try {
+    const stored = localStorage.getItem('cart')
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
 }
 
-const applyCart = (state, cart) => {
-  state.id = cart.id
-  state.items = cart.items || []
-  state.totalItems = cart.total_items || 0
-  state.totalAmount = cart.total_amount || 0
+const calculateTotal = (items) =>
+  items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+const persistCart = (items) => {
+  localStorage.setItem('cart', JSON.stringify(items))
+}
+
+const initialItems = loadCartFromStorage()
+
+const initialState = {
+  items: initialItems,
+  total: calculateTotal(initialItems)
 }
 
 const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
-    clearCartLocal: (state) => {
-      state.id = null
-      state.items = []
-      state.totalItems = 0
-      state.totalAmount = 0
+    addToCart: (state, action) => {
+      const item = action.payload
+      const existing = state.items.find(i => i.id === item.id)
+      if (existing) {
+        existing.quantity += 1
+      } else {
+        state.items.push({ ...item, quantity: 1 })
+      }
+      state.total += item.price
+      persistCart(state.items)
     },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchCart.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
-      })
-      .addCase(fetchCart.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        applyCart(state, action.payload)
-      })
-      .addCase(fetchCart.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
-      })
-      .addCase(addToCart.fulfilled, (state, action) => applyCart(state, action.payload))
-      .addCase(addToCart.rejected, (state, action) => {
-        state.error = action.payload
-      })
-      .addCase(updateCartItemQuantity.fulfilled, (state, action) => applyCart(state, action.payload))
-      .addCase(removeCartItem.fulfilled, (state, action) => applyCart(state, action.payload))
-  },
+    updateQuantity: (state, action) => {
+      const { id, quantity } = action.payload
+      const item = state.items.find(i => i.id === id)
+      if (item) {
+        state.total -= item.price * item.quantity
+        item.quantity = quantity
+        state.total += item.price * item.quantity
+      }
+      persistCart(state.items)
+    },
+    removeFromCart: (state, action) => {
+      const id = action.payload
+      const item = state.items.find(i => i.id === id)
+      if (item) {
+        state.total -= item.price * item.quantity
+        state.items = state.items.filter(i => i.id !== id)
+      }
+      persistCart(state.items)
+    },
+    clearCart: (state) => {
+      state.items = []
+      state.total = 0
+      persistCart(state.items)
+    }
+  }
 })
 
 export const { clearCartLocal } = cartSlice.actions
