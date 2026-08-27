@@ -1,35 +1,44 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axios from 'axios'
+import APIClient from '../../services/apiClient'
 
-const API_URL = 'http://localhost:5000/api'
-
-// Thunks
+// POST /auth/register — creates the user but does NOT log them in
+// (the backend returns { success, message, user }, no tokens).
 export const registerUser = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
-    const res = await axios.post(`${API_URL}/auth/register`, userData)
+    const res = await APIClient.post('/auth/register', userData)
     return res.data
   } catch (err) {
-    return rejectWithValue(err.response.data)
+    return rejectWithValue(err.response?.data?.message || 'Registration failed')
   }
 })
 
+// POST /auth/login — returns { success, message, access_token, refresh_token, user }
 export const loginUser = createAsyncThunk('auth/login', async (userData, { rejectWithValue }) => {
   try {
-    const res = await axios.post(`${API_URL}/auth/login`, userData)
+    const res = await APIClient.post('/auth/login', userData)
     return res.data
   } catch (err) {
-    return rejectWithValue(err.response.data)
+    return rejectWithValue(err.response?.data?.message || 'Login failed')
+  }
+})
+
+export const logoutUser = createAsyncThunk('auth/logout', async () => {
+  try {
+    await APIClient.post('/auth/logout')
+  } catch {
+    // ignore — token may already be expired, we're clearing client state anyway
   }
 })
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: JSON.parse(localStorage.getItem('user')) || null, // persist user
+    user: JSON.parse(localStorage.getItem('user')) || null,
     token: localStorage.getItem('token') || null,
-    isAuthenticated: !!localStorage.getItem('token'), // true if token exists
+    isAuthenticated: !!localStorage.getItem('token'),
     loading: false,
-    error: null
+    error: null,
+    registerSuccess: false,
   },
   reducers: {
     logout: (state) => {
@@ -37,45 +46,60 @@ const authSlice = createSlice({
       state.token = null
       state.isAuthenticated = false
       localStorage.removeItem('token')
+      localStorage.removeItem('refreshToken')
       localStorage.removeItem('user')
     },
-    clearAuthError: (state) => { 
+    clearAuthError: (state) => {
       state.error = null
-    }
+    },
+    clearRegisterSuccess: (state) => {
+      state.registerSuccess = false
+    },
   },
   extraReducers: (builder) => {
     builder
-      // Register
-      .addCase(registerUser.pending, (state) => { state.loading = true; state.error = null })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      // register — no tokens come back, so we don't authenticate the user
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+        state.registerSuccess = false
+      })
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false
-        state.user = action.payload.user
-        state.token = action.payload.token
-        state.isAuthenticated = true
-        localStorage.setItem('token', action.payload.token)
-        localStorage.setItem('user', JSON.stringify(action.payload.user))
+        state.registerSuccess = true
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload?.message || 'Registration failed'
+        state.error = action.payload || 'Registration failed'
       })
-
-      // Login
-      .addCase(loginUser.pending, (state) => { state.loading = true; state.error = null })
+      // login
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload.user
-        state.token = action.payload.token
+        state.token = action.payload.access_token
         state.isAuthenticated = true
-        localStorage.setItem('token', action.payload.token)
+        localStorage.setItem('token', action.payload.access_token)
+        localStorage.setItem('refreshToken', action.payload.refresh_token)
         localStorage.setItem('user', JSON.stringify(action.payload.user))
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
-        state.error = action.payload?.message || 'Login failed'
+        state.error = action.payload || 'Login failed'
       })
-  }
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null
+        state.token = null
+        state.isAuthenticated = false
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+      })
+  },
 })
 
-export const { logout, clearAuthError } = authSlice.actions
+export const { logout, clearAuthError, clearRegisterSuccess } = authSlice.actions
 export default authSlice.reducer
