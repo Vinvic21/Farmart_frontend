@@ -232,9 +232,17 @@ const FarmerDashboard = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {animals.map(animal => (
-                  <div key={animal.id} className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
-                    <div className="w-full h-36 bg-gradient-to-br from-farmart-green/10 to-farmart-cream flex items-center justify-center text-6xl">
-                      {TYPE_EMOJI[(animal.type || '').toLowerCase()] || '🐾'}
+                  <div key={animal.id} className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+                    <div className="w-full h-36 bg-gradient-to-br from-farmart-green/10 to-farmart-cream flex items-center justify-center text-6xl overflow-hidden">
+                      {animal.image_url ? (
+                        <img
+                          src={animal.image_url} alt={animal.breed} className="w-full h-full object-cover"
+                          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                        />
+                      ) : null}
+                      <span style={animal.image_url ? { display: 'none' } : undefined}>
+                        {TYPE_EMOJI[(animal.type || '').toLowerCase()] || '🐾'}
+                      </span>
                     </div>
                     <div className="p-4">
                       <h3 className="font-display font-bold capitalize text-gray-800">{animal.breed} {animal.type}</h3>
