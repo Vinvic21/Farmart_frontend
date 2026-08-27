@@ -1,26 +1,74 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import APIClient from '../../services/apiClient';
 
-export const fetchBuyerOrders = createAsyncThunk('orders/fetchBuyerOrders', async (buyerId) => {
-  const res = await APIClient.get(`/orders/buyer/${buyerId}`);
-  return res.data;
+// GET /orders/ — the backend figures out buyer vs. farmer vs. admin view
+// from the JWT, no id needs to be passed in.
+export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { rejectWithValue }) => {
+  try {
+    const res = await APIClient.get('/orders/');
+    return res.data.orders;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to load orders');
+  }
 });
 
-export const createOrder = createAsyncThunk('orders/createOrder', async (orderData) => {
-  const res = await APIClient.post('/orders', orderData);
-  return res.data;
+// POST /orders/checkout — converts the buyer's cart into an order. Requires
+// delivery details; the cart itself is read server-side, not sent by us.
+export const checkout = createAsyncThunk('orders/checkout', async (deliveryDetails, { rejectWithValue }) => {
+  try {
+    const res = await APIClient.post('/orders/checkout', deliveryDetails);
+    return res.data.order;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to place order');
+  }
+});
+
+export const confirmOrder = createAsyncThunk('orders/confirmOrder', async (orderId, { rejectWithValue }) => {
+  try {
+    const res = await APIClient.patch(`/orders/${orderId}/confirm`);
+    return res.data.order;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to confirm order');
+  }
+});
+
+export const rejectOrder = createAsyncThunk('orders/rejectOrder', async (orderId, { rejectWithValue }) => {
+  try {
+    const res = await APIClient.patch(`/orders/${orderId}/reject`);
+    return res.data.order;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to reject order');
+  }
 });
 
 const ordersSlice = createSlice({
   name: 'orders',
-  initialState: { orders: [], loading: false, error: null },
+  initialState: { orders: [], loading: false, error: null, checkoutStatus: 'idle', lastOrder: null },
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchBuyerOrders.pending, (state) => { state.loading = true; })
-      .addCase(fetchBuyerOrders.fulfilled, (state, action) => { state.loading = false; state.orders = action.payload; })
-      .addCase(createOrder.pending, (state) => { state.loading = true; })
-      .addCase(createOrder.fulfilled, (state) => { state.loading = false; })
+      .addCase(fetchOrders.pending, (state) => { state.loading = true; state.error = null; })
+      .addCase(fetchOrders.fulfilled, (state, action) => { state.loading = false; state.orders = action.payload; })
+      .addCase(fetchOrders.rejected, (state, action) => { state.loading = false; state.error = action.payload; })
+
+      .addCase(checkout.pending, (state) => { state.checkoutStatus = 'loading'; state.error = null; })
+      .addCase(checkout.fulfilled, (state, action) => {
+        state.checkoutStatus = 'succeeded';
+        state.lastOrder = action.payload;
+      })
+      .addCase(checkout.rejected, (state, action) => {
+        state.checkoutStatus = 'failed';
+        state.error = action.payload;
+      })
+
+      .addCase(confirmOrder.fulfilled, (state, action) => {
+        const idx = state.orders.findIndex((o) => o.id === action.payload.id);
+        if (idx !== -1) state.orders[idx] = action.payload;
+      })
+      .addCase(rejectOrder.fulfilled, (state, action) => {
+        const idx = state.orders.findIndex((o) => o.id === action.payload.id);
+        if (idx !== -1) state.orders[idx] = action.payload;
+      });
   }
 });
 
