@@ -10,7 +10,7 @@ import AnimalDetailPage from "../pages/buyer/AnimalDetailPage";
 import CheckoutPage from "../pages/buyer/CheckoutPage";
 import OrderConfirmationPage from "../pages/buyer/OrderConfirmationPage";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
-import AnimalFormPage from "../pages/farmer/AnimalFormPage"; 
+import AnimalFormPage from "../pages/farmer/AnimalFormPage";
 import FarmerOrdersPage from "../pages/farmer/FarmerOrdersPage";
 
 export default function AppRoutes() {
@@ -23,7 +23,7 @@ export default function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/cart" element={<CartPage />} />
 
-      {/* Buyer + Both - Lazima wakuwe logged in */}
+      {/* Buyer + Both - must be logged in */}
       <Route element={<ProtectedRoute />}>
         <Route path="/orders" element={<OrderHistoryPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
@@ -32,13 +32,11 @@ export default function AppRoutes() {
 
       {/* Only farmers */}
       <Route element={<ProtectedRoute roles={['farmer']} />}>
-        <Route path="/farmer/dashboard" element={<FarmerDashboard />} /> {/* FIXED: nikaweka / */}
-        <Route path="/farmer/orders" element={<OrderHistoryPage />} />
-        <Route path="/farmer/add-animal" element={<AnimalFormPage />} /> {/* */}
-        <Route path="/farmer/edit-animal/:id" element={<AnimalFormPage />} /> {/* */}
-        <Route path="/farmer/orders" element={<FarmerOrdersPage />} /> {/* */}
+        <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
+        <Route path="/farmer/add-animal" element={<AnimalFormPage />} />
+        <Route path="/farmer/edit-animal/:id" element={<AnimalFormPage />} />
+        <Route path="/farmer/orders" element={<FarmerOrdersPage />} />
       </Route>
     </Routes>
   );
-} 
-    
+}
