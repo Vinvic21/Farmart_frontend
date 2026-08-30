@@ -12,6 +12,7 @@ import OrderConfirmationPage from "../pages/buyer/OrderConfirmationPage";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 import AnimalFormPage from "../pages/farmer/AnimalFormPage";
 import FarmerOrdersPage from "../pages/farmer/FarmerOrdersPage";
+import AdminDashboard from "../pages/admin/AdminDashboard";
 
 export default function AppRoutes() {
   return (
@@ -36,6 +37,11 @@ export default function AppRoutes() {
         <Route path="/farmer/add-animal" element={<AnimalFormPage />} />
         <Route path="/farmer/edit-animal/:id" element={<AnimalFormPage />} />
         <Route path="/farmer/orders" element={<FarmerOrdersPage />} />
+      </Route>
+
+      {/* Only admins */}
+      <Route element={<ProtectedRoute roles={['admin']} />}>
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Route>
     </Routes>
   );

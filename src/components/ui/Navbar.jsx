@@ -62,6 +62,11 @@ export default function Navbar() {
                     Dashboard
                   </Link>
                 )}
+                {user?.role === "admin" && (
+                  <Link to="/admin/dashboard" className="text-gray-600 hover:text-farmart-green-deep font-medium transition-colors">
+                    Admin
+                  </Link>
+                )}
                 <span className="text-gray-400 text-sm truncate max-w-[140px]">Hi, {displayName}</span>
                 <button
                   onClick={handleLogout}
@@ -97,6 +102,9 @@ export default function Navbar() {
                 )}
                 {user?.role === "farmer" && (
                   <Link to="/farmer/dashboard" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">Dashboard</Link>
+                )}
+                {user?.role === "admin" && (
+                  <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">Admin</Link>
                 )}
                 <span className="text-gray-400 text-sm">Hi, {displayName}</span>
                 <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium text-left">
