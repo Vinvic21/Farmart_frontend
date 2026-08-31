@@ -36,7 +36,13 @@ export default function LoginPage() {
     const result = await dispatch(loginUser({ email, password }));
     if (result.meta.requestStatus === "fulfilled") {
       const user = result.payload.user;
-      navigate(user?.role === "farmer" ? "/farmer/dashboard" : "/browse");
+      if (user?.role === "farmer") {
+        navigate("/farmer/dashboard");
+      } else if (user?.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/browse");
+      }
     }
   }
 

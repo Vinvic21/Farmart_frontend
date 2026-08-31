@@ -17,6 +17,9 @@ export default function Navbar() {
   };
 
   const cartCount = items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
+  // No "name" field exists on the user yet — use the part of the email
+  // before the @ as a friendly display name (e.g. john@gmail.com -> john).
+  const displayName = user?.email?.split("@")[0] || "";
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
@@ -59,7 +62,12 @@ export default function Navbar() {
                     Dashboard
                   </Link>
                 )}
-                <span className="text-gray-400 text-sm truncate max-w-[140px]">Hi, {user?.email}</span>
+                {user?.role === "admin" && (
+                  <Link to="/admin/dashboard" className="text-gray-600 hover:text-farmart-green-deep font-medium transition-colors">
+                    Admin
+                  </Link>
+                )}
+                <span className="text-gray-400 text-sm truncate max-w-[140px]">Hi, {displayName}</span>
                 <button
                   onClick={handleLogout}
                   className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-medium transition-colors"
@@ -95,7 +103,10 @@ export default function Navbar() {
                 {user?.role === "farmer" && (
                   <Link to="/farmer/dashboard" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">Dashboard</Link>
                 )}
-                <span className="text-gray-400 text-sm">Hi, {user?.email}</span>
+                {user?.role === "admin" && (
+                  <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">Admin</Link>
+                )}
+                <span className="text-gray-400 text-sm">Hi, {displayName}</span>
                 <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium text-left">
                   Logout
                 </button>
