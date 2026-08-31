@@ -120,7 +120,7 @@ function AnimalDetailPage() {
               </div>
               <div>
                 <p className="text-gray-500">Age</p>
-                <p className="font-semibold">{animal.age_months != null ? `${animal.age_months} months` : '—'}</p>
+                <p className="font-semibold">{animal.age != null ? `${animal.age} months` : '—'}</p>
               </div>
               <div>
                 <p className="text-gray-500">Type</p>
