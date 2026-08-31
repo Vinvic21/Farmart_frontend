@@ -3,11 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAnimalById, clearCurrentAnimal } from '../../features/animals/animalsSlice';
 import { addToCart } from '../../features/cart/cartSlice';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔' };
 
 const STATUS_STYLES = {
-  available: 'bg-farmart-green/10 text-farmart-green-deep',
+  available: 'bg-farmart-green/10 text-farmart-green',
   pending: 'bg-amber-100 text-amber-700',
   sold: 'bg-gray-200 text-gray-600',
 };
@@ -34,18 +36,14 @@ function AnimalDetailPage() {
     }
     const result = await dispatch(addToCart({ animalId: animal.id, quantity }));
     if (result.meta.requestStatus === 'fulfilled') {
-      alert(`${animal.breed} ${animal.type} added to cart!`);
+      toast.success(`${animal.breed} ${animal.type} added to cart!`);
     } else {
-      alert(result.payload || 'Failed to add to cart');
+      toast.error(result.payload || 'Failed to add to cart');
     }
   };
 
   if (detailStatus === 'loading') {
-    return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center text-gray-500">
-        Loading animal details...
-      </div>
-    );
+    return <LoadingSpinner label="Loading animal details..." />;
   }
 
   if (detailStatus === 'failed') {
@@ -53,7 +51,7 @@ function AnimalDetailPage() {
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <p className="text-red-600 font-semibold mb-2">Couldn't load this animal.</p>
         <p className="text-gray-500 text-sm mb-6">{detailError}</p>
-        <Link to="/browse" className="text-farmart-green-deep font-medium">
+        <Link to="/browse" className="text-farmart-green font-medium">
           ← Back to browse
         </Link>
       </div>
@@ -66,14 +64,13 @@ function AnimalDetailPage() {
   const isAvailable = animal.status === 'available';
 
   return (
-    <div className="bg-farmart-cream min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <Link to="/browse" className="text-sm text-gray-500 hover:text-farmart-green-deep mb-6 inline-block">
+        <Link to="/browse" className="text-sm text-gray-500 hover:text-farmart-green mb-6 inline-block">
           ← Back to browse
         </Link>
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left: photo + about */}
           <div className="lg:col-span-2 space-y-6">
             <div className="relative bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <span
@@ -83,7 +80,7 @@ function AnimalDetailPage() {
               >
                 {animal.status || 'available'}
               </span>
-              <div className="w-full h-72 sm:h-96 bg-gradient-to-br from-farmart-green/10 to-farmart-cream flex items-center justify-center text-[10rem] overflow-hidden">
+              <div className="w-full h-72 sm:h-96 bg-gray-100 flex items-center justify-center text-[10rem] overflow-hidden">
                 {animal.image_url ? (
                   <img
                     src={animal.image_url}
@@ -97,23 +94,22 @@ function AnimalDetailPage() {
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-              <h2 className="font-display font-bold text-lg text-gray-800 mb-3">About This Animal</h2>
+              <h2 className="font-bold text-lg text-gray-800 mb-3">About This Animal</h2>
               <p className="text-gray-600 text-sm leading-relaxed">
                 {animal.description || "The seller hasn't added a description for this animal yet."}
               </p>
             </div>
           </div>
 
-          {/* Right: purchase card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit lg:sticky lg:top-24">
-            <h1 className="font-display text-2xl font-bold text-gray-800 capitalize">
+            <h1 className="text-2xl font-bold text-gray-800 capitalize">
               {animal.breed} {animal.type}
             </h1>
-            {animal.farmer?.email && (
-              <p className="text-gray-500 text-sm mt-1">Listed by {animal.farmer.email}</p>
+            {animal.farmer_name && (
+              <p className="text-gray-500 text-sm mt-1">Listed by {animal.farmer_name}</p>
             )}
 
-            <p className="font-display text-3xl font-bold text-farmart-green-deep mt-4">
+            <p className="text-3xl font-bold text-farmart-green mt-4">
               Ksh {animal.price?.toLocaleString()}
             </p>
 
@@ -124,7 +120,7 @@ function AnimalDetailPage() {
               </div>
               <div>
                 <p className="text-gray-500">Age</p>
-                <p className="font-semibold">{animal.age != null ? `${animal.age} months` : '—'}</p>
+                <p className="font-semibold">{animal.age_months != null ? `${animal.age_months} months` : '—'}</p>
               </div>
               <div>
                 <p className="text-gray-500">Type</p>
@@ -160,13 +156,13 @@ function AnimalDetailPage() {
             <button
               onClick={handleAddToCart}
               disabled={!isAvailable}
-              className="w-full mt-6 bg-farmart-amber text-white rounded-lg py-3 font-semibold hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-6 bg-farmart-green text-white rounded-lg py-3 font-semibold hover:bg-farmart-green/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {!isAvailable ? (animal.status === 'sold' ? 'Sold' : 'Pending Sale') : 'Add to Cart'}
             </button>
 
             <p className="text-xs text-gray-400 text-center mt-4">
-              Farmart holds payment securely until you confirm delivery.
+              🔒 Secure checkout
             </p>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAnimals } from '../../features/animals/animalsSlice'
 import { addToCart } from '../../features/cart/cartSlice'
+import toast from 'react-hot-toast'
 import AnimalCard from '../../components/ui/AnimalCard'
 
 const TYPE_FILTERS = [
@@ -37,6 +38,7 @@ export default function BrowsePage() {
     dispatch(fetchAnimals({ page, search, type, minPrice, maxPrice }))
   }, [dispatch, page, search, type, minPrice, maxPrice])
 
+  
   const sortedAnimals = useMemo(() => {
     if (sortBy === 'price_asc') return [...animals].sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
     if (sortBy === 'price_desc') return [...animals].sort((a, b) => (b.price ?? 0) - (a.price ?? 0))
@@ -48,12 +50,8 @@ export default function BrowsePage() {
       navigate('/login')
       return
     }
-    const result = await dispatch(addToCart({ animalId: animal.id }))
-    if (result.meta.requestStatus === 'fulfilled') {
-      alert(`${animal.breed || animal.type} added to cart!`)
-    } else {
-      alert(result.payload || 'Failed to add to cart')
-    }
+    dispatch(addToCart(animal))
+    toast.success(`${animal.name} added to cart!`) 
   }
 
   const activeFilters = [
