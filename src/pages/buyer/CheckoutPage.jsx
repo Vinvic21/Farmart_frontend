@@ -17,8 +17,6 @@ export default function CheckoutPage() {
     delivery_address: '',
     preferred_delivery_date: '',
   })
-  // Guards the empty-cart redirect below from firing right after a
-  // successful order clears the cart (see handlePlaceOrder).
   const [justOrdered, setJustOrdered] = useState(false)
 
   useEffect(() => {
@@ -35,7 +33,6 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault()
-    // preferred_delivery_date is optional — only send it if filled in
     const payload = { ...form }
     if (!payload.preferred_delivery_date) delete payload.preferred_delivery_date
 

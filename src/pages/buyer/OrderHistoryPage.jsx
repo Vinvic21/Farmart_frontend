@@ -33,7 +33,6 @@ function OrderHistoryPage() {
       setPayMessage({ orderId, type: 'error', text: err.response?.data?.error || 'Failed to start payment' })
     } finally {
       setPayingId(null)
-      // Refresh so status flips to "paid" once the M-Pesa webhook lands.
       setTimeout(() => dispatch(fetchOrders()), 4000)
     }
   }

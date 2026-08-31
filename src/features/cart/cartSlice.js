@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import APIClient from '../../services/apiClient'
 
-// The backend owns the cart (it's tied to the logged-in buyer), so all of
+// The backend owns the cart (logged-in buyer), so all of
 // these hit real endpoints instead of just mutating local state.
 
 export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { rejectWithValue }) => {
@@ -18,7 +18,6 @@ export const addToCart = createAsyncThunk(
   async ({ animalId, quantity = 1 }, { dispatch, rejectWithValue }) => {
     try {
       await APIClient.post('/cart/items', { animal_id: animalId, quantity })
-      // Re-fetch so we get the full cart with subtotal/total_amount computed server-side.
       return dispatch(fetchCart()).unwrap()
     } catch (err) {
       return rejectWithValue(err.response?.data?.error || 'Failed to add item to cart')
@@ -70,6 +69,8 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    // Resets local view only — used right after a successful checkout,
+    // since the backend has already cleared the cart server-side.
     clearCartLocal: (state) => {
       state.id = null
       state.items = []
@@ -79,24 +80,18 @@ const cartSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCart.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
-      })
-      .addCase(fetchCart.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        applyCart(state, action.payload)
-      })
-      .addCase(fetchCart.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
-      })
-      .addCase(addToCart.fulfilled, (state, action) => applyCart(state, action.payload))
-      .addCase(addToCart.rejected, (state, action) => {
-        state.error = action.payload
-      })
-      .addCase(updateCartItemQuantity.fulfilled, (state, action) => applyCart(state, action.payload))
-      .addCase(removeCartItem.fulfilled, (state, action) => applyCart(state, action.payload))
+      .addCase(fetchCart.pending, (state) => { state.status = 'loading'; state.error = null })
+      .addCase(fetchCart.fulfilled, (state, action) => { state.status = 'succeeded'; applyCart(state, action.payload) })
+      .addCase(fetchCart.rejected, (state, action) => { state.status = 'failed'; state.error = action.payload })
+
+      .addCase(addToCart.fulfilled, (state, action) => { applyCart(state, action.payload) })
+      .addCase(addToCart.rejected, (state, action) => { state.error = action.payload })
+
+      .addCase(updateCartItemQuantity.fulfilled, (state, action) => { applyCart(state, action.payload) })
+      .addCase(updateCartItemQuantity.rejected, (state, action) => { state.error = action.payload })
+
+      .addCase(removeCartItem.fulfilled, (state, action) => { applyCart(state, action.payload) })
+      .addCase(removeCartItem.rejected, (state, action) => { state.error = action.payload })
   },
 })
 

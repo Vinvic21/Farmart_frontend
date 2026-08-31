@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { fetchAnimals } from '../../features/animals/animalsSlice'
 import { addToCart } from '../../features/cart/cartSlice'
+import toast from 'react-hot-toast'
 import AnimalCard from '../../components/ui/AnimalCard'
 
 const TYPE_FILTERS = [
@@ -48,11 +49,11 @@ export default function BrowsePage() {
       navigate('/login')
       return
     }
-    const result = await dispatch(addToCart({ animalId: animal.id }))
+    const result = await dispatch(addToCart({ animalId: animal.id, quantity: 1 }))
     if (result.meta.requestStatus === 'fulfilled') {
-      alert(`${animal.breed || animal.type} added to cart!`)
+      toast.success(`${animal.breed || animal.type} added to cart!`)
     } else {
-      alert(result.payload || 'Failed to add to cart')
+      toast.error(result.payload || 'Failed to add to cart')
     }
   }
 
@@ -66,7 +67,6 @@ export default function BrowsePage() {
   return (
     <div className="bg-farmart-cream min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search */}
         <div className="relative mb-5">
           <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
           <input
@@ -78,7 +78,6 @@ export default function BrowsePage() {
           />
         </div>
 
-        {/* Type chips + price + sort */}
         <div className="flex flex-wrap items-center gap-3 mb-6">
           {TYPE_FILTERS.map((f) => (
             <button
@@ -124,7 +123,6 @@ export default function BrowsePage() {
           </div>
         </div>
 
-        {/* Active filter pills */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {activeFilters.map((f) => (
@@ -139,7 +137,6 @@ export default function BrowsePage() {
           </div>
         )}
 
-        {/* Results heading */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-xl font-bold text-gray-800">
             {listStatus === 'succeeded' ? `${total} result${total === 1 ? '' : 's'}` : 'Animals for Sale'}

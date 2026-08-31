@@ -7,7 +7,7 @@ function OrderConfirmationPage() {
   const order = location.state?.order;
 
   // No order in state means the page was visited directly, not after a
-  // real checkout — send them back rather than showing fake data.
+  // real checkout 
   if (!order) {
     return <Navigate to="/orders" replace />;
   }
@@ -16,8 +16,8 @@ function OrderConfirmationPage() {
     <div className="min-h-screen bg-gray-50 px-4 py-10 sm:py-16 flex justify-center">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6 sm:p-10 h-fit">
         <div className="flex justify-center mb-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-green-100 flex items-center justify-center">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-green-600 text-white flex items-center justify-center text-xl sm:text-2xl">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-farmart-green/10 flex items-center justify-center">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-farmart-green text-white flex items-center justify-center text-xl sm:text-2xl">
               ✓
             </div>
           </div>
@@ -33,7 +33,7 @@ function OrderConfirmationPage() {
         <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
           <div className="flex justify-between items-center px-4 sm:px-6 py-4 bg-gray-50 border-b border-gray-200">
             <span className="text-sm font-medium text-gray-600">Order Number</span>
-            <span className="font-bold text-green-700">#{order.order_number || order.id}</span>
+            <span className="font-bold text-farmart-green">#{order.order_number || order.id}</span>
           </div>
 
           <div className="px-4 sm:px-6 divide-y divide-gray-100">
@@ -57,7 +57,7 @@ function OrderConfirmationPage() {
 
           <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50">
             <span className="font-semibold">Total</span>
-            <span className="font-bold text-lg text-green-700">Ksh {order.total_amount?.toLocaleString()}</span>
+            <span className="font-bold text-lg text-farmart-green">Ksh {order.total_amount?.toLocaleString()}</span>
           </div>
         </div>
 
@@ -70,7 +70,7 @@ function OrderConfirmationPage() {
           </Link>
           <Link
             to="/browse"
-            className="order-1 sm:order-2 text-center px-8 py-3 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors"
+            className="order-1 sm:order-2 text-center px-8 py-3 bg-farmart-green text-white rounded-lg text-sm font-semibold hover:bg-farmart-green/90 transition-colors"
           >
             Continue Shopping →
           </Link>

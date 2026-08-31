@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchOrders, confirmOrder, rejectOrder } from '../../features/orders/ordersSlice'
+import toast from 'react-hot-toast'
 
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -20,12 +21,20 @@ export default function FarmerOrdersPage() {
 
   const handleConfirm = async (orderId) => {
     const result = await dispatch(confirmOrder(orderId))
-    if (result.meta.requestStatus !== 'fulfilled') alert(result.payload || 'Failed to confirm order')
+    if (result.meta.requestStatus === 'fulfilled') {
+      toast.success('Order confirmed.')
+    } else {
+      toast.error(result.payload || 'Failed to confirm order')
+    }
   }
 
   const handleReject = async (orderId) => {
     const result = await dispatch(rejectOrder(orderId))
-    if (result.meta.requestStatus !== 'fulfilled') alert(result.payload || 'Failed to reject order')
+    if (result.meta.requestStatus === 'fulfilled') {
+      toast.success('Order rejected.')
+    } else {
+      toast.error(result.payload || 'Failed to reject order')
+    }
   }
 
   if (loading) return <div className="p-8 text-center">Loading orders...</div>

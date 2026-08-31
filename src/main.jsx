@@ -4,14 +4,19 @@ import App from './App.jsx'
 import './index.css'
 import { Provider } from 'react-redux'
 import { store } from './store/store.js'
-import { BrowserRouter } from 'react-router-dom' // <- THIS IS THE KEY
+import { BrowserRouter } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </Provider>
+    <ErrorBoundary>
+      <Provider store={store}>
+        <BrowserRouter>
+          <App />
+          <Toaster position="top-right" />
+        </BrowserRouter>
+      </Provider>
+    </ErrorBoundary>
   </React.StrictMode>,
 )
