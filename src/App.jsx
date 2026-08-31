@@ -2,13 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "./features/auth/authSlice";
 import AppRoutes from "./routes/AppRoutes";
-import CheckoutPage from "./pages/buyer/CheckoutPage";
-import OrderConfirmationPage from "./pages/buyer/OrderConfirmationPage";
 
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { totalItems } = useSelector((state) => state.cart);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -27,7 +26,14 @@ function App() {
             
             <div className="flex gap-6 items-center">
               <Link to="/browse" className="text-gray-700 hover:text-green-600 font-medium">Browse</Link>
-              <Link to="/cart" className="text-gray-700 hover:text-green-600 font-medium">Cart</Link>
+              <Link to="/cart" className="relative text-gray-700 hover:text-green-600 font-medium">
+                Cart
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-green-600 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
               
               {isAuthenticated ? (
                 <>
