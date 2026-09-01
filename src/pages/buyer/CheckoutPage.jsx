@@ -110,7 +110,7 @@ export default function CheckoutPage() {
             {checkoutStatus === 'loading' ? 'Placing Order...' : 'Place Order'}
           </button>
           <p className="text-xs text-gray-400 text-center">
-            The farmer confirms your order first — you'll pay via M-Pesa from your Order History once confirmed.
+            Your order is placed immediately and you can pay via M-Pesa from your Order History.
           </p>
         </form>
       </div>
