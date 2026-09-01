@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchOrders, confirmOrder, rejectOrder } from '../../features/orders/ordersSlice'
-import toast from 'react-hot-toast'
+import { fetchOrders } from '../../features/orders/ordersSlice'
 
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -18,24 +17,6 @@ export default function FarmerOrdersPage() {
   useEffect(() => {
     dispatch(fetchOrders())
   }, [dispatch])
-
-  const handleConfirm = async (orderId) => {
-    const result = await dispatch(confirmOrder(orderId))
-    if (result.meta.requestStatus === 'fulfilled') {
-      toast.success('Order confirmed.')
-    } else {
-      toast.error(result.payload || 'Failed to confirm order')
-    }
-  }
-
-  const handleReject = async (orderId) => {
-    const result = await dispatch(rejectOrder(orderId))
-    if (result.meta.requestStatus === 'fulfilled') {
-      toast.success('Order rejected.')
-    } else {
-      toast.error(result.payload || 'Failed to reject order')
-    }
-  }
 
   if (loading) return <div className="p-8 text-center">Loading orders...</div>
 
@@ -81,23 +62,6 @@ export default function FarmerOrdersPage() {
                       <p className="text-sm text-gray-500">Ordered: {new Date(order.created_at).toLocaleDateString()}</p>
                     )}
                   </div>
-
-                  {myStatus === 'pending' && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleConfirm(order.id)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded font-semibold"
-                      >
-                        Confirm
-                      </button>
-                      <button
-                        onClick={() => handleReject(order.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-semibold"
-                      >
-                        Reject
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
             )

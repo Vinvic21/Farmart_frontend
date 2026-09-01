@@ -67,6 +67,9 @@ export default function Navbar() {
                     Admin
                   </Link>
                 )}
+                <Link to="/profile" className="text-gray-600 hover:text-farmart-green-deep font-medium transition-colors">
+                  Profile
+                </Link>
                 <span className="text-gray-400 text-sm truncate max-w-[140px]">Hi, {displayName}</span>
                 <button
                   onClick={handleLogout}
@@ -106,6 +109,7 @@ export default function Navbar() {
                 {user?.role === "admin" && (
                   <Link to="/admin/dashboard" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">Admin</Link>
                 )}
+                <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-gray-600 font-medium">My Profile</Link>
                 <span className="text-gray-400 text-sm">Hi, {displayName}</span>
                 <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded-lg font-medium text-left">
                   Logout

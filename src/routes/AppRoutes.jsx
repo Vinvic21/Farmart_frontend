@@ -9,6 +9,8 @@ import CartPage from "../pages/buyer/CartPage";
 import AnimalDetailPage from "../pages/buyer/AnimalDetailPage";
 import CheckoutPage from "../pages/buyer/CheckoutPage";
 import OrderConfirmationPage from "../pages/buyer/OrderConfirmationPage";
+import UserProfilePage from "../pages/user/UserProfilePage";
+import EditProfilePage from "../pages/user/EditProfilePage";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 import AnimalFormPage from "../pages/farmer/AnimalFormPage";
 import FarmerOrdersPage from "../pages/farmer/FarmerOrdersPage";
@@ -29,6 +31,8 @@ export default function AppRoutes() {
         <Route path="/orders" element={<OrderHistoryPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+        <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/profile/edit" element={<EditProfilePage />} />
       </Route>
 
       {/* Only farmers */}
