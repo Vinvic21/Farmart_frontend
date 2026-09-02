@@ -11,6 +11,7 @@ import CheckoutPage from "../pages/buyer/CheckoutPage";
 import OrderConfirmationPage from "../pages/buyer/OrderConfirmationPage";
 import UserProfilePage from "../pages/user/UserProfilePage";
 import EditProfilePage from "../pages/user/EditProfilePage";
+import FarmerProfilePage from "../pages/user/FarmerProfilePage";
 import ProtectedRoute from "../features/auth/ProtectedRoute";
 import AnimalFormPage from "../pages/farmer/AnimalFormPage";
 import FarmerOrdersPage from "../pages/farmer/FarmerOrdersPage";
@@ -22,6 +23,7 @@ export default function AppRoutes() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/browse" element={<BrowsePage />} />
       <Route path="/animal/:id" element={<AnimalDetailPage />} />
+      <Route path="/farmer/:id" element={<FarmerProfilePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/cart" element={<CartPage />} />
