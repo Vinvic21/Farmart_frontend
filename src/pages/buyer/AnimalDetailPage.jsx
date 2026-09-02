@@ -105,8 +105,21 @@ function AnimalDetailPage() {
             <h1 className="text-2xl font-bold text-gray-800 capitalize">
               {animal.breed} {animal.type}
             </h1>
-            {animal.farmer_name && (
-              <p className="text-gray-500 text-sm mt-1">Listed by {animal.farmer_name}</p>
+            {animal.farmer?.name && (
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <p className="text-gray-500 text-sm">
+                  Listed by {animal.farmer.name}
+                  {animal.farmer?.profile?.verification_status === 'verified' && (
+                    <span title="Verified farmer" className="text-farmart-green-deep font-semibold ml-1">✓ Verified</span>
+                  )}
+                </p>
+                <Link
+                  to={`/farmer/${animal.farmer.id}`}
+                  className="text-xs font-semibold text-farmart-green-deep hover:underline"
+                >
+                  View Profile →
+                </Link>
+              </div>
             )}
 
             <p className="text-3xl font-bold text-farmart-green mt-4">
@@ -162,7 +175,7 @@ function AnimalDetailPage() {
             </button>
 
             <p className="text-xs text-gray-400 text-center mt-4">
-              🔒 Secure checkout
+               Secure checkout
             </p>
           </div>
         </div>
