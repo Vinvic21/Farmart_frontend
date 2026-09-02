@@ -52,8 +52,24 @@ const AnimalCard = ({ animal, onAddToCart }) => {
             {title}
           </h3>
         </Link>
-        <p className="text-xs text-gray-500 mt-0.5 truncate">
-          {animal.farmer?.email ? `Listed by ${animal.farmer.email}` : 'Farmart listing'}
+        <p className="text-xs text-gray-500 mt-0.5 truncate flex items-center gap-1">
+          {animal.farmer?.name ? (
+            <>
+              <span className="truncate">Listed by {animal.farmer.name}</span>
+              {animal.farmer?.profile?.verification_status === 'verified' && (
+                <span title="Verified farmer" className="text-farmart-green-deep shrink-0">✓</span>
+              )}
+              <Link
+                to={`/farmer/${animal.farmer.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="ml-1 text-farmart-green-deep font-semibold hover:underline shrink-0"
+              >
+                View Profile
+              </Link>
+            </>
+          ) : (
+            'Farmart listing'
+          )}
         </p>
         {animal.age != null && (
           <p className="text-xs text-gray-500 mt-1">{animal.age} months old</p>
