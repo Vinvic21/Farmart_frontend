@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
 import {
   fetchAdminStats,
   fetchAdminUsers,
@@ -67,11 +68,35 @@ const AdminDashboard = () => {
   const handleDeleteUser = (targetUser) => {
     if (!window.confirm(`Delete ${targetUser.email}? This cannot be undone.`)) return
     dispatch(deleteUser(targetUser.id))
+      .unwrap()
+      .then(() =>
+        toast.success(`${targetUser.email} deleted`, {
+          icon: '🗑️',
+          style: { background: '#dc2626', color: '#fff' },
+        })
+      )
+      .catch((err) =>
+        toast.error(err || 'Failed to delete user', {
+          style: { background: '#7f1d1d', color: '#fff' },
+        })
+      )
   }
 
   const handleDeleteAnimal = (animal) => {
     if (!window.confirm(`Remove this ${animal.breed} ${animal.type} listing?`)) return
     dispatch(deleteAnimalAsAdmin(animal.id))
+      .unwrap()
+      .then(() =>
+        toast.success('Listing removed', {
+          icon: '🗑️',
+          style: { background: '#dc2626', color: '#fff' },
+        })
+      )
+      .catch((err) =>
+        toast.error(err || 'Failed to delete animal', {
+          style: { background: '#7f1d1d', color: '#fff' },
+        })
+      )
   }
 
   const handleSelectFarmer = (farmerId) => {

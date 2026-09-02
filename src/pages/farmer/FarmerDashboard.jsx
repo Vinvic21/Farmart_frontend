@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
 import APIClient from '../../services/apiClient'
 import { fetchOrders } from '../../features/orders/ordersSlice'
 
@@ -52,11 +53,17 @@ const FarmerDashboard = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this animal?')) return
     try {
-      await APIClient.delete(`/animals/${id}`)
-      setAnimals(animals.filter(a => a.id !== id))
+      const res = await APIClient.delete(`/animals/${id}`)
+      setAnimals(animals.filter((a) => a.id !== id))
+      toast.success(res.data?.message || 'Listing removed', {
+        icon: '🗑️',
+        style: { background: '#dc2626', color: '#fff' },
+      })
     } catch (err) {
       console.error(err)
-      alert(err.response?.data?.error || 'Failed to delete animal')
+      toast.error(err.response?.data?.error || 'Failed to delete animal', {
+        style: { background: '#7f1d1d', color: '#fff' },
+      })
     }
   }
 
