@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { fetchOrders } from '../../features/orders/ordersSlice'
@@ -18,10 +18,30 @@ function OrderHistoryPage() {
   const { orders, loading, error } = useSelector((state) => state.orders)
   const [payingId, setPayingId] = useState(null)
   const [payMessage, setPayMessage] = useState(null)
+  const pollRef = useRef(null)
+  const trackedOrderId = useRef(null)
 
   useEffect(() => {
     dispatch(fetchOrders())
   }, [dispatch])
+
+  // Stop polling as soon as the order we're watching actually resolves,
+  // instead of always running the full set of background refetches.
+  useEffect(() => {
+    if (!trackedOrderId.current || !pollRef.current) return
+    const order = orders.find((o) => o.id === trackedOrderId.current)
+    if (order && ['paid', 'rejected'].includes(order.status)) {
+      clearInterval(pollRef.current)
+      pollRef.current = null
+      trackedOrderId.current = null
+    }
+  }, [orders])
+
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [])
 
   const handlePayNow = async (orderId) => {
     setPayingId(orderId)
@@ -29,12 +49,21 @@ function OrderHistoryPage() {
     try {
       const res = await APIClient.post('/payments/initiate', { order_id: orderId })
       setPayMessage({ orderId, type: 'success', text: res.data.message || 'Check your phone to complete payment.' })
-      // The STK push is confirmed on the backend a few seconds after it's
-      // sent (no real payment processing yet), so poll a few times instead
-      // of checking once too early.
-      ;[3000, 6000, 9000, 12000, 15000].forEach((delay) => {
-        setTimeout(() => dispatch(fetchOrders()), delay)
-      })
+
+      // The payment is confirmed on the backend a few seconds after the
+      // STK push goes out (no real payment processing yet), so poll for
+      // it — but stop as soon as it resolves, or after a safety cap.
+      trackedOrderId.current = orderId
+      if (pollRef.current) clearInterval(pollRef.current)
+      let attempts = 0
+      pollRef.current = setInterval(() => {
+        attempts += 1
+        dispatch(fetchOrders())
+        if (attempts >= 6) {
+          clearInterval(pollRef.current)
+          pollRef.current = null
+        }
+      }, 3000)
     } catch (err) {
       setPayMessage({ orderId, type: 'error', text: err.response?.data?.error || 'Failed to start payment' })
     } finally {
@@ -44,7 +73,7 @@ function OrderHistoryPage() {
 
   const canPayForOrder = (status) => ['pending', 'confirmed'].includes(status)
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading your orders...</div>
+  if (loading && orders.length === 0) return <div className="p-8 text-center text-gray-500">Loading your orders...</div>
 
   return (
     <div className="bg-farmart-cream min-h-screen">
