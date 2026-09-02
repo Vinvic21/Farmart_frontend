@@ -61,18 +61,47 @@ export const deleteAnimalAsAdmin = createAsyncThunk('admin/deleteAnimal', async 
   }
 });
 
+// GET /admin/revenue — total revenue owed to each farmer, for payouts
+export const fetchFarmerRevenue = createAsyncThunk('admin/fetchFarmerRevenue', async (_, { rejectWithValue }) => {
+  try {
+    const res = await APIClient.get('/admin/revenue');
+    return res.data;
+  } catch (err) {
+    return rejectWithValue(err.response?.data?.message || 'Failed to load revenue');
+  }
+});
+
+// GET /admin/revenue/:farmerId — line-item breakdown for one farmer
+export const fetchFarmerRevenueDetail = createAsyncThunk(
+  'admin/fetchFarmerRevenueDetail',
+  async (farmerId, { rejectWithValue }) => {
+    try {
+      const res = await APIClient.get(`/admin/revenue/${farmerId}`);
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || 'Failed to load farmer revenue');
+    }
+  }
+);
+
 const adminSlice = createSlice({
   name: 'admin',
   initialState: {
     stats: null,
     users: [],
     animals: [],
+    revenue: { total_revenue: 0, farmers: [] },
+    selectedFarmerRevenue: null,
     loading: false,
+    revenueLoading: false,
     error: null,
   },
   reducers: {
     clearAdminError: (state) => {
       state.error = null;
+    },
+    clearSelectedFarmerRevenue: (state) => {
+      state.selectedFarmerRevenue = null;
     },
   },
   extraReducers: (builder) => {
@@ -97,16 +126,63 @@ const adminSlice = createSlice({
       })
       .addCase(verifyUser.fulfilled, (state, action) => {
         const idx = state.users.findIndex((u) => u.id === action.payload.id);
+        const previousStatus = idx !== -1 ? state.users[idx].profile?.verification_status : null;
         if (idx !== -1) state.users[idx] = action.payload;
+
+        // Keep the "Pending Verifications" stat card in sync instantly,
+        // instead of waiting on a manual refresh / stats refetch.
+        if (state.stats && previousStatus !== action.payload.profile?.verification_status) {
+          if (action.payload.profile?.verification_status === 'verified' && previousStatus !== 'verified') {
+            state.stats.pending_verifications = Math.max(0, (state.stats.pending_verifications || 0) - 1);
+          } else if (previousStatus === 'verified' && action.payload.profile?.verification_status !== 'verified') {
+            state.stats.pending_verifications = (state.stats.pending_verifications || 0) + 1;
+          }
+        }
       })
       .addCase(deleteUser.fulfilled, (state, action) => {
+        const deletedUser = state.users.find((u) => u.id === action.payload);
         state.users = state.users.filter((u) => u.id !== action.payload);
+
+        // Same idea for the top-level user/role counts — decrement locally
+        // so the dashboard reflects the delete right away.
+        if (state.stats && deletedUser) {
+          state.stats.total_users = Math.max(0, (state.stats.total_users || 0) - 1);
+          if (deletedUser.role === 'farmer') {
+            state.stats.total_farmers = Math.max(0, (state.stats.total_farmers || 0) - 1);
+          } else if (deletedUser.role === 'buyer') {
+            state.stats.total_buyers = Math.max(0, (state.stats.total_buyers || 0) - 1);
+          }
+          if (deletedUser.profile?.verification_status === 'pending') {
+            state.stats.pending_verifications = Math.max(0, (state.stats.pending_verifications || 0) - 1);
+          }
+        }
       })
       .addCase(deleteAnimalAsAdmin.fulfilled, (state, action) => {
+        const deletedAnimal = state.animals.find((a) => a.id === action.payload);
         state.animals = state.animals.filter((a) => a.id !== action.payload);
+        if (state.stats && deletedAnimal) {
+          state.stats.total_animals = Math.max(0, (state.stats.total_animals || 0) - 1);
+          if (deletedAnimal.status === 'available') {
+            state.stats.available_animals = Math.max(0, (state.stats.available_animals || 0) - 1);
+          }
+        }
+      })
+      .addCase(fetchFarmerRevenue.pending, (state) => {
+        state.revenueLoading = true;
+      })
+      .addCase(fetchFarmerRevenue.fulfilled, (state, action) => {
+        state.revenueLoading = false;
+        state.revenue = { total_revenue: action.payload.total_revenue, farmers: action.payload.farmers };
+      })
+      .addCase(fetchFarmerRevenue.rejected, (state, action) => {
+        state.revenueLoading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchFarmerRevenueDetail.fulfilled, (state, action) => {
+        state.selectedFarmerRevenue = action.payload;
       });
   },
 });
 
-export const { clearAdminError } = adminSlice.actions;
+export const { clearAdminError, clearSelectedFarmerRevenue } = adminSlice.actions;
 export default adminSlice.reducer;

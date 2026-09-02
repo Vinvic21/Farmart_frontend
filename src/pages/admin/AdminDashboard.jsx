@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -8,6 +7,9 @@ import {
   verifyUser,
   deleteUser,
   deleteAnimalAsAdmin,
+  fetchFarmerRevenue,
+  fetchFarmerRevenueDetail,
+  clearSelectedFarmerRevenue,
 } from '../../features/admin/adminSlice'
 
 const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔', pig: '🐖' }
@@ -16,6 +18,7 @@ const TABS = [
   { key: 'overview', label: 'Overview' },
   { key: 'users', label: 'Users' },
   { key: 'animals', label: 'Animals' },
+  { key: 'revenue', label: 'Farmer Payouts' },
 ]
 
 const ROLE_FILTERS = [
@@ -28,7 +31,9 @@ const ROLE_FILTERS = [
 const AdminDashboard = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
-  const { stats, users, animals, loading } = useSelector((state) => state.admin)
+  const { stats, users, animals, loading, revenue, revenueLoading, selectedFarmerRevenue } = useSelector(
+    (state) => state.admin
+  )
 
   const [activeTab, setActiveTab] = useState('overview')
   const [roleFilter, setRoleFilter] = useState('')
@@ -43,6 +48,17 @@ const AdminDashboard = () => {
     dispatch(fetchAdminUsers(roleFilter || undefined))
   }, [dispatch, roleFilter])
 
+  useEffect(() => {
+    if (activeTab === 'revenue') {
+      dispatch(fetchFarmerRevenue())
+      // Payments can complete a few seconds after being initiated, so keep
+      // this tab reasonably fresh while it's open rather than requiring a
+      // manual tab switch to see updated numbers.
+      const interval = setInterval(() => dispatch(fetchFarmerRevenue()), 8000)
+      return () => clearInterval(interval)
+    }
+  }, [dispatch, activeTab])
+
   const handleVerify = (userId, currentStatus) => {
     const nextStatus = currentStatus === 'verified' ? 'pending' : 'verified'
     dispatch(verifyUser({ userId, status: nextStatus }))
@@ -56,6 +72,10 @@ const AdminDashboard = () => {
   const handleDeleteAnimal = (animal) => {
     if (!window.confirm(`Remove this ${animal.breed} ${animal.type} listing?`)) return
     dispatch(deleteAnimalAsAdmin(animal.id))
+  }
+
+  const handleSelectFarmer = (farmerId) => {
+    dispatch(fetchFarmerRevenueDetail(farmerId))
   }
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'Admin'
@@ -259,6 +279,126 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+          {activeTab === 'revenue' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-display text-xl font-bold text-gray-800">Farmer Payouts</h2>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm text-gray-500">
+                    Total owed: Ksh {revenue.total_revenue?.toLocaleString() ?? 0}
+                  </span>
+                  <button
+                    onClick={() => dispatch(fetchFarmerRevenue())}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+                  >
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-500 mb-4">
+                All buyer payments currently land in one shared M-Pesa account. Use this to see how much
+                of that money belongs to each farmer before dispersing payouts.
+              </p>
+
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                {revenueLoading ? (
+                  <p className="text-gray-500 text-sm px-5 py-8 text-center">Loading revenue...</p>
+                ) : revenue.farmers.length === 0 ? (
+                  <p className="text-gray-500 text-sm px-5 py-8 text-center">No paid orders yet.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-gray-500 border-b border-gray-100">
+                          <th className="px-5 py-3 font-medium">Farmer</th>
+                          <th className="px-5 py-3 font-medium">Email</th>
+                          <th className="px-5 py-3 font-medium">Paid Orders</th>
+                          <th className="px-5 py-3 font-medium">Amount Owed</th>
+                          <th className="px-5 py-3 font-medium text-right">Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {revenue.farmers.map((f) => (
+                          <tr key={f.farmer_id} className="border-b border-gray-50 last:border-0">
+                            <td className="px-5 py-3 text-gray-800">{f.name || '—'}</td>
+                            <td className="px-5 py-3 text-gray-600">{f.email}</td>
+                            <td className="px-5 py-3 text-gray-600">{f.paid_orders}</td>
+                            <td className="px-5 py-3 font-semibold text-farmart-green-deep">
+                              Ksh {f.total_revenue.toLocaleString()}
+                            </td>
+                            <td className="px-5 py-3 text-right">
+                              <button
+                                onClick={() => handleSelectFarmer(f.farmer_id)}
+                                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+                              >
+                                View orders
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {selectedFarmerRevenue && (
+                <div
+                  className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50"
+                  onClick={() => dispatch(clearSelectedFarmerRevenue())}
+                >
+                  <div
+                    className="bg-white rounded-2xl shadow-lg max-w-lg w-full max-h-[80vh] overflow-y-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 sticky top-0 bg-white">
+                      <div>
+                        <h3 className="font-display font-bold text-gray-800">
+                          {selectedFarmerRevenue.farmer?.name || 'Farmer'}
+                        </h3>
+                        <p className="text-xs text-gray-500">{selectedFarmerRevenue.farmer?.email}</p>
+                      </div>
+                      <button
+                        onClick={() => dispatch(clearSelectedFarmerRevenue())}
+                        className="text-gray-400 hover:text-gray-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    <div className="p-5">
+                      <p className="text-sm text-gray-500 mb-3">
+                        Total owed:{' '}
+                        <span className="font-semibold text-farmart-green-deep">
+                          Ksh {selectedFarmerRevenue.total_revenue.toLocaleString()}
+                        </span>
+                      </p>
+                      {selectedFarmerRevenue.orders.length === 0 ? (
+                        <p className="text-gray-500 text-sm">No paid orders for this farmer yet.</p>
+                      ) : (
+                        <div className="divide-y divide-gray-50">
+                          {selectedFarmerRevenue.orders.map((o, idx) => (
+                            <div key={idx} className="py-3 flex justify-between items-center text-sm">
+                              <div>
+                                <p className="text-gray-800 capitalize">{o.animal || 'Animal'}</p>
+                                <p className="text-xs text-gray-400">
+                                  Order #{o.order_number || o.order_id} · Qty {o.quantity}
+                                  {o.date ? ` · ${new Date(o.date).toLocaleDateString()}` : ''}
+                                </p>
+                              </div>
+                              <span className="font-semibold text-gray-700">
+                                Ksh {o.subtotal.toLocaleString()}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
