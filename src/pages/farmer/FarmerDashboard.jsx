@@ -6,7 +6,6 @@ import { fetchOrders } from '../../features/orders/ordersSlice'
 
 const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔' }
 const STATUSES = ['available', 'pending', 'sold']
-const REVENUE_STATUSES = ['confirmed', 'paid']
 
 const ITEM_STATUS_STYLES = {
   pending: 'bg-amber-100 text-amber-700',
@@ -69,6 +68,7 @@ const FarmerDashboard = () => {
         .filter((item) => item.farmer_id === user?.id)
         .map((item) => ({
           ...item,
+          orderStatus: order.status,
           orderNumber: order.order_number || order.id,
           buyer: `${order.recipient_first_name || ''} ${order.recipient_last_name || ''}`.trim() || 'Buyer',
           date: order.created_at,
@@ -78,8 +78,12 @@ const FarmerDashboard = () => {
 
   const stats = useMemo(() => {
     const pendingOrders = myItems.filter((i) => i.status === 'pending').length
+    // "Revenue" only counts once the buyer has actually paid (Order.status
+    // === 'paid'), not just once the farmer has confirmed they'll fulfill
+    // it — otherwise this number disagrees with what the admin sees for
+    // payouts, and shows money that hasn't actually arrived yet.
     const totalRevenue = myItems
-      .filter((i) => REVENUE_STATUSES.includes(i.status))
+      .filter((i) => i.orderStatus === 'paid')
       .reduce((sum, i) => sum + (i.price_at_purchase || 0) * (i.quantity || 1), 0)
     return { totalAnimals: animals.length, pendingOrders, totalRevenue }
   }, [myItems, animals])

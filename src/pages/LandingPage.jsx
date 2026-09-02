@@ -16,10 +16,10 @@ const HERO_SLIDES = [
 const HERO_SLIDE_INTERVAL_MS = 5000;
 
 const CATEGORIES = [
-  { label: "Cattle", type: "cow", emoji: "🐄" },
-  { label: "Goats", type: "goat", emoji: "🐐" },
-  { label: "Sheep", type: "sheep", emoji: "🐑" },
-  { label: "Poultry", type: "chicken", emoji: "🐔" },
+  { label: "Cattle", type: "cow", emoji: "" },
+  { label: "Goats", type: "goat", emoji: "" },
+  { label: "Sheep", type: "sheep", emoji: "" },
+  { label: "Poultry", type: "chicken", emoji: "" },
 ];
 
 const TRUST_POINTS = [

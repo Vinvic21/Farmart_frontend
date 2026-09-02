@@ -29,11 +29,16 @@ function OrderHistoryPage() {
     try {
       const res = await APIClient.post('/payments/initiate', { order_id: orderId })
       setPayMessage({ orderId, type: 'success', text: res.data.message || 'Check your phone to complete payment.' })
+      // The STK push is confirmed on the backend a few seconds after it's
+      // sent (no real payment processing yet), so poll a few times instead
+      // of checking once too early.
+      ;[3000, 6000, 9000, 12000, 15000].forEach((delay) => {
+        setTimeout(() => dispatch(fetchOrders()), delay)
+      })
     } catch (err) {
       setPayMessage({ orderId, type: 'error', text: err.response?.data?.error || 'Failed to start payment' })
     } finally {
       setPayingId(null)
-      setTimeout(() => dispatch(fetchOrders()), 4000)
     }
   }
 

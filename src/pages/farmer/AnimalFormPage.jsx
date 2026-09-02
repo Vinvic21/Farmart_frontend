@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import APIClient from '../../services/apiClient'
 
-const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔' }
+const TYPE_EMOJI = { cow: '', goat: '', sheep: '', chicken: '' }
 
 // Shrinks whatever the user picks from their gallery down to a reasonable
 // JPEG data URL before it goes anywhere near image_url — full-res phone
@@ -165,7 +165,7 @@ const AnimalFormPage = () => {
                         imageMode === mode ? 'bg-white shadow-sm text-farmart-green-deep' : 'text-gray-500 hover:text-gray-700'
                       }`}
                     >
-                      {mode === 'link' ? '🔗 Image link' : '🖼️ From gallery'}
+                      {mode === 'link' ? ' Image link' : 'From gallery'}
                     </button>
                   ))}
                 </div>
@@ -211,10 +211,10 @@ const AnimalFormPage = () => {
             <div>
               <label className={labelClass}>Type</label>
               <select value={form.type} onChange={set('type')} className={inputClass}>
-                <option value="cow">🐄 Cow</option>
-                <option value="goat">🐐 Goat</option>
-                <option value="sheep">🐑 Sheep</option>
-                <option value="chicken">🐔 Chicken</option>
+                <option value="cow"> Cow</option>
+                <option value="goat">Goat</option>
+                <option value="sheep"> Sheep</option>
+                <option value="chicken"> Chicken</option>
               </select>
             </div>
             <div>
