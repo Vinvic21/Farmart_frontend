@@ -23,23 +23,7 @@ export const checkout = createAsyncThunk('orders/checkout', async (deliveryDetai
   }
 });
 
-export const confirmOrder = createAsyncThunk('orders/confirmOrder', async (orderId, { rejectWithValue }) => {
-  try {
-    const res = await APIClient.patch(`/orders/${orderId}/confirm`);
-    return res.data.order;
-  } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to confirm order');
-  }
-});
 
-export const rejectOrder = createAsyncThunk('orders/rejectOrder', async (orderId, { rejectWithValue }) => {
-  try {
-    const res = await APIClient.patch(`/orders/${orderId}/reject`);
-    return res.data.order;
-  } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Failed to reject order');
-  }
-});
 
 const ordersSlice = createSlice({
   name: 'orders',
@@ -59,15 +43,6 @@ const ordersSlice = createSlice({
       .addCase(checkout.rejected, (state, action) => {
         state.checkoutStatus = 'failed';
         state.error = action.payload;
-      })
-
-      .addCase(confirmOrder.fulfilled, (state, action) => {
-        const idx = state.orders.findIndex((o) => o.id === action.payload.id);
-        if (idx !== -1) state.orders[idx] = action.payload;
-      })
-      .addCase(rejectOrder.fulfilled, (state, action) => {
-        const idx = state.orders.findIndex((o) => o.id === action.payload.id);
-        if (idx !== -1) state.orders[idx] = action.payload;
       });
   }
 });

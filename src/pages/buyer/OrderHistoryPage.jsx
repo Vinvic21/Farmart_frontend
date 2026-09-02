@@ -37,6 +37,8 @@ function OrderHistoryPage() {
     }
   }
 
+  const canPayForOrder = (status) => ['pending', 'confirmed'].includes(status)
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading your orders...</div>
 
   return (
@@ -102,7 +104,7 @@ function OrderHistoryPage() {
                     Total: <span className="font-display font-bold text-farmart-green-deep">Ksh {order.total_amount?.toLocaleString()}</span>
                   </p>
 
-                  {order.status === 'confirmed' && (
+                  {canPayForOrder(order.status) && (
                     <button
                       onClick={() => handlePayNow(order.id)}
                       disabled={payingId === order.id}
@@ -114,7 +116,7 @@ function OrderHistoryPage() {
                   {order.status === 'paid' && (
                     <span className="text-farmart-green-deep font-semibold text-sm">✓ Paid</span>
                   )}
-                  {order.status === 'pending' && (
+                  {order.status === 'pending' && !canPayForOrder(order.status) && (
                     <span className="text-gray-400 text-sm">Waiting for farmer confirmation</span>
                   )}
                   {order.status === 'rejected' && (

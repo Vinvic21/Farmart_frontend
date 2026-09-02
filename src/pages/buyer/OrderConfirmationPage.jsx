@@ -24,10 +24,10 @@ function OrderConfirmationPage() {
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-bold text-center mb-2">
-          Order Placed Successfully!
+          Order Confirmed!
         </h1>
         <p className="text-gray-500 text-center text-sm sm:text-base mb-8">
-          Thank you for your purchase. The farmer(s) will confirm your order shortly.
+          Thank you for your purchase. Your order has been confirmed and will be delivered shortly.
         </p>
 
         <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
