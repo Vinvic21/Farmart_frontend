@@ -1,11 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import APIClient from '../../services/apiClient'
 
+const normalizeUser = (user) => ({ ...user, ...(user?.profile || {}) })
+
 // GET /users/profile — fetch the logged-in user's profile
 export const fetchUserProfile = createAsyncThunk('userProfile/fetch', async (_, { rejectWithValue }) => {
   try {
     const res = await APIClient.get('/users/profile')
-    return res.data.user
+    return normalizeUser(res.data.user)
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Failed to fetch profile')
   }
@@ -15,7 +17,7 @@ export const fetchUserProfile = createAsyncThunk('userProfile/fetch', async (_, 
 export const updateUserProfile = createAsyncThunk('userProfile/update', async (profileData, { rejectWithValue }) => {
   try {
     const res = await APIClient.patch('/users/profile', profileData)
-    return res.data.user
+    return normalizeUser(res.data.user)
   } catch (err) {
     return rejectWithValue(err.response?.data?.message || 'Failed to update profile')
   }
