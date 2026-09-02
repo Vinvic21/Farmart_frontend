@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {
@@ -57,7 +58,7 @@ const AdminDashboard = () => {
     dispatch(deleteAnimalAsAdmin(animal.id))
   }
 
-  const displayName = user?.email?.split('@')[0] || 'Admin'
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Admin'
 
   return (
     <div className="bg-farmart-cream min-h-screen">
@@ -144,6 +145,7 @@ const AdminDashboard = () => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-gray-500 border-b border-gray-100">
+                        <th className="px-5 py-3 font-medium">Name</th>
                         <th className="px-5 py-3 font-medium">Email</th>
                         <th className="px-5 py-3 font-medium">Role</th>
                         <th className="px-5 py-3 font-medium">Location</th>
@@ -154,6 +156,7 @@ const AdminDashboard = () => {
                     <tbody>
                       {users.map((u) => (
                         <tr key={u.id} className="border-b border-gray-50 last:border-0">
+                          <td className="px-5 py-3 text-gray-800">{u.name || '—'}</td>
                           <td className="px-5 py-3 text-gray-800">{u.email}</td>
                           <td className="px-5 py-3">
                             <span className="capitalize text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600">
@@ -240,7 +243,7 @@ const AdminDashboard = () => {
                           Ksh {animal.price?.toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-500 mt-1 truncate">
-                          Listed by {animal.farmer?.email || 'unknown farmer'}
+                          Listed by {animal.farmer?.name || 'unknown farmer'}
                         </p>
                         <span className="inline-block text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 capitalize mt-2">
                           {animal.status}

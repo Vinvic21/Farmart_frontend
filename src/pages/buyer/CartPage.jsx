@@ -6,14 +6,18 @@ import { fetchCart, updateCartItemQuantity, removeCartItem } from '../../feature
 const TYPE_EMOJI = { cow: '🐄', goat: '🐐', sheep: '🐑', chicken: '🐔' }
 
 export default function CartPage() {
-  const { items, totalAmount, status } = useSelector((state) => state.cart)
+  const { items, totalAmount, status, updatingItemId, removingItemId } = useSelector((state) => state.cart)
   const dispatch = useDispatch()
 
   useEffect(() => {
     dispatch(fetchCart())
   }, [dispatch])
 
-  if (status === 'loading') {
+  // Only the very first load (before we have any data at all) shows the
+  // full-page loader. Every mutation after that (quantity change, remove)
+  // updates state in place — the list itself never unmounts, so nothing
+  // "refreshes" from the buyer's point of view.
+  if (status === 'loading' && items.length === 0) {
     return <div className="p-8 text-center text-gray-500">Loading your cart...</div>
   }
 
@@ -40,8 +44,14 @@ export default function CartPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 divide-y divide-gray-100 overflow-hidden">
           {items.map(item => {
             const emoji = TYPE_EMOJI[(item.animal?.type || '').toLowerCase()] || '🐾'
+            const isUpdating = updatingItemId === item.id
+            const isRemoving = removingItemId === item.id
+            const rowBusy = isUpdating || isRemoving
             return (
-              <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5">
+              <div
+                key={item.id}
+                className={`flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 transition-opacity ${rowBusy ? 'opacity-50 pointer-events-none' : ''}`}
+              >
                 <div className="w-full sm:w-20 h-20 rounded-lg bg-gradient-to-br from-farmart-green/10 to-farmart-cream flex items-center justify-center text-3xl overflow-hidden flex-shrink-0">
                   {item.animal?.image_url ? (
                     <img
@@ -59,15 +69,17 @@ export default function CartPage() {
 
                 <div className="flex items-center border border-gray-200 rounded-lg">
                   <button
+                    disabled={rowBusy}
                     onClick={() => dispatch(updateCartItemQuantity({ itemId: item.id, quantity: Math.max(1, item.quantity - 1) }))}
-                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50"
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                   >
                     −
                   </button>
-                  <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
+                  <span className="w-8 text-center text-sm font-semibold">{isUpdating ? '…' : item.quantity}</span>
                   <button
+                    disabled={rowBusy}
                     onClick={() => dispatch(updateCartItemQuantity({ itemId: item.id, quantity: item.quantity + 1 }))}
-                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50"
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-50"
                   >
                     +
                   </button>
@@ -78,10 +90,11 @@ export default function CartPage() {
                 </span>
 
                 <button
+                  disabled={rowBusy}
                   onClick={() => dispatch(removeCartItem(item.id))}
-                  className="text-sm text-red-500 hover:text-red-700 font-medium"
+                  className="text-sm text-red-500 hover:text-red-700 font-medium disabled:opacity-50"
                 >
-                  Remove
+                  {isRemoving ? 'Removing…' : 'Remove'}
                 </button>
               </div>
             )
