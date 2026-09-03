@@ -1,6 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import APIClient from '../../services/apiClient'
 
+// Shared by every auth thunk: turns an axios error into a message that
+// actually tells the user what happened, instead of collapsing "wrong
+// password" and "the server never responded" into one generic string.
+function getAuthErrorMessage(err, fallback) {
+  if (err.response?.data?.message) {
+    // The backend responded — this is a real auth/validation error.
+    return err.response.data.message
+  }
+  if (err.code === 'ECONNABORTED' || !err.response) {
+    // No response at all: likely a cold start (Render free tier spins
+    // down after ~15 min idle and can take up to a minute to wake back
+    // up) or a genuine connectivity issue — not necessarily bad credentials.
+    return 'Could not reach the server. It may be waking up after being idle — please wait a few seconds and try again.'
+  }
+  return fallback
+}
+
 // POST /auth/register — creates the user but does NOT log them in
 // (the backend returns { success, message, user }, no tokens).
 export const registerUser = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
@@ -8,7 +25,7 @@ export const registerUser = createAsyncThunk('auth/register', async (userData, {
     const res = await APIClient.post('/auth/register', userData)
     return res.data
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Registration failed')
+    return rejectWithValue(getAuthErrorMessage(err, 'Registration failed'))
   }
 })
 
@@ -18,7 +35,7 @@ export const loginUser = createAsyncThunk('auth/login', async (userData, { rejec
     const res = await APIClient.post('/auth/login', userData)
     return res.data
   } catch (err) {
-    return rejectWithValue(err.response?.data?.message || 'Login failed')
+    return rejectWithValue(getAuthErrorMessage(err, 'Login failed'))
   }
 })
 
