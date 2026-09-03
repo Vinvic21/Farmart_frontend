@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { loginUser, clearAuthError } from "../../features/auth/authSlice";
@@ -14,6 +14,21 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [slowNotice, setSlowNotice] = useState(false);
+  const slowTimerRef = useRef(null);
+
+  // The backend can take up to ~60s to wake up from a cold start (Render
+  // free tier). If login is still pending after a few seconds, let the
+  // user know it's not frozen instead of leaving them staring at a spinner.
+  useEffect(() => {
+    if (loading) {
+      slowTimerRef.current = setTimeout(() => setSlowNotice(true), 5000);
+    } else {
+      clearTimeout(slowTimerRef.current);
+      setSlowNotice(false);
+    }
+    return () => clearTimeout(slowTimerRef.current);
+  }, [loading]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -104,6 +119,12 @@ export default function LoginPage() {
             >
               {loading ? "Logging in..." : "Login →"}
             </button>
+
+            {slowNotice && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg text-center py-2">
+                Still working — the server may be waking up after a period of inactivity. This can take up to a minute.
+              </p>
+            )}
           </form>
 
           <p className="text-center text-sm text-gray-600 mt-6">

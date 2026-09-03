@@ -2,6 +2,11 @@ import axios from 'axios';
 
 const APIClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  // Render's free tier spins the backend down after ~15 min idle, and
+  // waking it back up can take 30-60s. A short/no timeout here just means
+  // a cold start gets misread as a failed request. This gives it room to
+  // actually finish waking up before we give up.
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },
